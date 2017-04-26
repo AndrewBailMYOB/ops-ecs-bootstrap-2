@@ -1,10 +1,10 @@
-#ops-cloudformation
+# ops-cloudformation
 
-##Usage
-    `make create`
-    `make delete`
+## Usage
+  -  `make create`
+  -  `make delete`
 
-##Network
+## Network
 
 ### Params
 
