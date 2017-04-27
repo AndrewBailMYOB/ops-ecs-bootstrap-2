@@ -17,3 +17,4 @@
 | AppSubnetCIDR |  | `10.0.10.0/24,10.0.11.0/24,10.0.12.0/24` | yes |
 | DataSubnetCIDR |  | `10.0.20.0/24,10.0.21.0/24,10.0.22.0/24` | yes |
 | VpcFlowLogRetention |  | 14 | no |
+| ThreeTier |  | false | no |
