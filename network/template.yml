@@ -38,6 +38,14 @@ Parameters:
         Type: String
         Default: REJECT
 
+    ThreeTier:
+        Description: Create a Data Subnet or Not
+        Type: String
+        Default: false
+
+Conditions:
+  CreateThreeTier: !Equals [!Ref ThreeTier, true]
+
 Resources:
 
     VPC:
@@ -178,6 +186,7 @@ Resources:
 
     DataSubnet1:
         Type: AWS::EC2::Subnet
+        Condition: CreateThreeTier
         Properties:
             VpcId: !Ref VPC
             AvailabilityZone: !Select [ 0, !Ref AvailabilityZones ]
@@ -189,6 +198,7 @@ Resources:
 
     DataSubnet2:
         Type: AWS::EC2::Subnet
+        Condition: CreateThreeTier
         Properties:
             VpcId: !Ref VPC
             AvailabilityZone: !Select [ 1, !Ref AvailabilityZones ]
@@ -200,6 +210,7 @@ Resources:
 
     DataSubnet3:
         Type: AWS::EC2::Subnet
+        Condition: CreateThreeTier
         Properties:
             VpcId: !Ref VPC
             AvailabilityZone: !Select [ 2, !Ref AvailabilityZones ]
@@ -352,18 +363,21 @@ Resources:
 
     DataSubnet1RouteTableAssociation:
         Type: AWS::EC2::SubnetRouteTableAssociation
+        Condition: CreateThreeTier
         Properties:
             RouteTableId: !Ref DataRouteTable
             SubnetId: !Ref DataSubnet1
 
     DataSubnet2RouteTableAssociation:
         Type: AWS::EC2::SubnetRouteTableAssociation
+        Condition: CreateThreeTier
         Properties:
             RouteTableId: !Ref DataRouteTable
             SubnetId: !Ref DataSubnet2
 
     DataSubnet3RouteTableAssociation:
         Type: AWS::EC2::SubnetRouteTableAssociation
+        Condition: CreateThreeTier
         Properties:
             RouteTableId: !Ref DataRouteTable
             SubnetId: !Ref DataSubnet3
@@ -383,5 +397,6 @@ Outputs:
         Value: !Join [ ",", [ !Ref AppSubnet1, !Ref AppSubnet2, !Ref AppSubnet3 ]]
 
     DataSubnets:
+        Condition: CreateThreeTier
         Description: A list of the data subnets
         Value: !Join [ ",", [ !Ref DataSubnet1, !Ref DataSubnet2, !Ref DataSubnet3 ]]
