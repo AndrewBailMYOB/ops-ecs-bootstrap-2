@@ -1,402 +1,677 @@
 Description: >
-    This template creates a VPC, with a 3 Subnet Types
-    (Public, App and Data) across 3 Availability Zones.
+  This template creates a VPC, with a 3 Subnet Types
+  (Public, App and Data) across 3 Availability Zones.
 
 Parameters:
 
-    EnvironmentName:
-        Description: The name to associate rescoures with
-        Type: String
+  EnvironmentName:
+    Description: The name to associate rescoures with
+    Type: String
 
-    VpcCIDR:
-        Description: Please enter the IP CIDR range
-        Type: String
+  VpcCIDR:
+    Description: Please enter the IP CIDR range
+    Type: String
 
-    AvailabilityZones:
-        Description: The AZs in the target region
-        Type: CommaDelimitedList
+  AvailabilityZones:
+    Description: The AZs in the target region
+    Type: CommaDelimitedList
 
-    PublicSubnetCIDR:
-        Description: The Public CIDR Ranges
-        Type: CommaDelimitedList
+  PublicSubnetCIDR:
+    Description: The Public CIDR Ranges
+    Type: CommaDelimitedList
 
-    AppSubnetCIDR:
-        Description: The App CIDR Ranges
-        Type: CommaDelimitedList
+  AppSubnetCIDR:
+    Description: The App CIDR Ranges
+    Type: CommaDelimitedList
 
-    DataSubnetCIDR:
-        Description: The Data CIDR Range
-        Type: CommaDelimitedList
+  DataSubnetCIDR:
+    Description: The Data CIDR Range
+    Type: CommaDelimitedList
 
-    VpcFlowLogRetention:
-        Description: Flow Log Retention in Days
-        Type: String
-        Default: 14
+  VpcFlowLogRetention:
+    Description: Flow Log Retention in Days
+    Type: String
+    Default: 14
 
-    VpcFlowLogTrafficType:
-        Description: Flow Log Traffic Type
-        Type: String
-        Default: REJECT
+  VpcFlowLogTrafficType:
+    Description: Flow Log Traffic Type
+    Type: String
+    Default: REJECT
 
-    ThreeTier:
-        Description: Create a Data Subnet or Not
-        Type: String
-        Default: false
+  LogForwarderPort:
+    Description: Splunk Forwarder Port
+    Type: String
+    Default: 9997
+
+  DbPort:
+    Description: Database Port
+    Type: String
+
+  ThreeTier:
+    Description: Create a Data Subnet or Not
+    Type: String
+    Default: false
 
 Conditions:
   CreateThreeTier: !Equals [!Ref ThreeTier, true]
 
 Resources:
 
-    VPC:
-        Type: AWS::EC2::VPC
-        Properties:
-            CidrBlock: !Ref VpcCIDR
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-vpc
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-vpc
 
-    InternetGateway:
-        Type: AWS::EC2::InternetGateway
-        Properties:
-            Tags:
-                - Key: Name
-                  Value: !Ref EnvironmentName
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
 
-    FlowLogRole:
-      Type: "AWS::IAM::Role"
-      Properties:
-        AssumeRolePolicyDocument:
-          Statement:
-            -
-              Effect: "Allow"
-              Principal:
-                Service:
-                  - "vpc-flow-logs.amazonaws.com"
-              Action:
-                - "sts:AssumeRole"
-        Path: "/"
-        RoleName: !Sub ${EnvironmentName}-vpc-flow-log
+  FlowLogRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        -
+          Effect: "Allow"
+          Principal:
+            Service:
+              - "vpc-flow-logs.amazonaws.com"
+          Action:
+            - "sts:AssumeRole"
+      Path: "/"
+      RoleName: !Sub ${EnvironmentName}-vpc-flow-log
 
-    FlowLogPolicy:
-      Type: "AWS::IAM::Policy"
-      Properties:
-        PolicyName: "allow_cw_logs"
-        PolicyDocument:
-          Statement:
-            -
-              Effect: "Allow"
-              Action:
-                 - "logs:CreateLogGroup"
-                 - "logs:CreateLogStream"
-                 - "logs:PutLogEvents"
-                 - "logs:DescribeLogGroups"
-                 - "logs:DescribeLogStreams"
-              Resource: "*"
-        Roles:
-          -
-            Ref: "FlowLogRole"
+  FlowLogPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: "allow_cw_logs"
+      PolicyDocument:
+        Statement:
+        -
+          Effect: "Allow"
+          Action:
+           - "logs:CreateLogGroup"
+           - "logs:CreateLogStream"
+           - "logs:PutLogEvents"
+           - "logs:DescribeLogGroups"
+           - "logs:DescribeLogStreams"
+          Resource: "*"
+      Roles:
+        -
+          !Ref FlowLogRole
 
-    CloudWatchLogGroup:
-      Type: "AWS::Logs::LogGroup"
-      Properties:
-        LogGroupName: !Sub ${EnvironmentName}-flow-logs
-        RetentionInDays: !Ref VpcFlowLogRetention
+  CloudWatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub ${EnvironmentName}-flow-logs
+      RetentionInDays: !Ref VpcFlowLogRetention
 
-    MainFlowLog:
-      Type: "AWS::EC2::FlowLog"
-      Properties:
-        DeliverLogsPermissionArn : !GetAtt FlowLogRole.Arn
-        LogGroupName : CloudWatchLogGroup
-        ResourceId : !Ref VPC
-        ResourceType : VPC
-        TrafficType : ALL
+  MainFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties:
+      DeliverLogsPermissionArn : !GetAtt FlowLogRole.Arn
+      LogGroupName : CloudWatchLogGroup
+      ResourceId : !Ref VPC
+      ResourceType : VPC
+      TrafficType : ALL
 
-    InternetGatewayAttachment:
-        Type: AWS::EC2::VPCGatewayAttachment
-        Properties:
-            InternetGatewayId: !Ref InternetGateway
-            VpcId: !Ref VPC
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
 
-    PublicSubnet1:
-        Type: AWS::EC2::Subnet
-        Properties:
-            VpcId: !Ref VPC
-            AvailabilityZone: !Select [ 0, !Ref AvailabilityZones ]
-            CidrBlock: !Select [ 0, !Ref PublicSubnetCIDR ]
-            MapPublicIpOnLaunch: true
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-public-1
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !Ref AvailabilityZones ]
+      CidrBlock: !Select [ 0, !Ref PublicSubnetCIDR ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-public-1
 
-    PublicSubnet2:
-        Type: AWS::EC2::Subnet
-        Properties:
-            VpcId: !Ref VPC
-            AvailabilityZone: !Select [ 1, !Ref AvailabilityZones ]
-            CidrBlock: !Select [ 1, !Ref PublicSubnetCIDR ]
-            MapPublicIpOnLaunch: true
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-public-2
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !Ref AvailabilityZones ]
+      CidrBlock: !Select [ 1, !Ref PublicSubnetCIDR ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-public-2
 
-    PublicSubnet3:
-        Type: AWS::EC2::Subnet
-        Properties:
-            VpcId: !Ref VPC
-            AvailabilityZone: !Select [ 2, !Ref AvailabilityZones ]
-            CidrBlock: !Select [ 2, !Ref PublicSubnetCIDR ]
-            MapPublicIpOnLaunch: true
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-public-3
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !Ref AvailabilityZones ]
+      CidrBlock: !Select [ 2, !Ref PublicSubnetCIDR ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-public-3
 
-    AppSubnet1:
-        Type: AWS::EC2::Subnet
-        Properties:
-            VpcId: !Ref VPC
-            AvailabilityZone: !Select [ 0, !Ref AvailabilityZones ]
-            CidrBlock: !Select [ 0, !Ref AppSubnetCIDR ]
-            MapPublicIpOnLaunch: false
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-app-1
+  PublicAcl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-public
 
-    AppSubnet2:
-        Type: AWS::EC2::Subnet
-        Properties:
-            VpcId: !Ref VPC
-            AvailabilityZone: !Select [ 1, !Ref AvailabilityZones ]
-            CidrBlock: !Select [ 1, !Ref AppSubnetCIDR ]
-            MapPublicIpOnLaunch: false
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-app-2
+  PublicAclRule1:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: false
+      NetworkAclId: !Ref PublicAcl
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 100
 
-    AppSubnet3:
-        Type: AWS::EC2::Subnet
-        Properties:
-            VpcId: !Ref VPC
-            AvailabilityZone: !Select [ 2, !Ref AvailabilityZones ]
-            CidrBlock: !Select [ 2, !Ref AppSubnetCIDR ]
-            MapPublicIpOnLaunch: false
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-app-3
+  PublicAclRule2:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Egress: true
+      NetworkAclId: !Ref PublicAcl
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 100
 
-    DataSubnet1:
-        Type: AWS::EC2::Subnet
-        Condition: CreateThreeTier
-        Properties:
-            VpcId: !Ref VPC
-            AvailabilityZone: !Select [ 0, !Ref AvailabilityZones ]
-            CidrBlock: !Select [ 0, !Ref DataSubnetCIDR ]
-            MapPublicIpOnLaunch: false
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-data-1
+  PublicAclRule3:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Egress: true
+      NetworkAclId: !Ref PublicAcl
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 101
 
-    DataSubnet2:
-        Type: AWS::EC2::Subnet
-        Condition: CreateThreeTier
-        Properties:
-            VpcId: !Ref VPC
-            AvailabilityZone: !Select [ 1, !Ref AvailabilityZones ]
-            CidrBlock: !Select [ 1, !Ref DataSubnetCIDR ]
-            MapPublicIpOnLaunch: false
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-data-2
+  PublicAclRuleAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      NetworkAclId: !Ref PublicAcl
 
-    DataSubnet3:
-        Type: AWS::EC2::Subnet
-        Condition: CreateThreeTier
-        Properties:
-            VpcId: !Ref VPC
-            AvailabilityZone: !Select [ 2, !Ref AvailabilityZones ]
-            CidrBlock: !Select [ 2, !Ref DataSubnetCIDR ]
-            MapPublicIpOnLaunch: false
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-data-3
+  PublicAclRuleAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      NetworkAclId: !Ref PublicAcl
 
-    NatGateway1EIP:
-        Type: AWS::EC2::EIP
-        DependsOn: InternetGatewayAttachment
-        Properties:
-            Domain: vpc
+  PublicAclRuleAssociation3:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet3
+      NetworkAclId: !Ref PublicAcl
 
-    NatGateway2EIP:
-        Type: AWS::EC2::EIP
-        DependsOn: InternetGatewayAttachment
-        Properties:
-            Domain: vpc
+  AppSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !Ref AvailabilityZones ]
+      CidrBlock: !Select [ 0, !Ref AppSubnetCIDR ]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-app-1
 
-    NatGateway3EIP:
-        Type: AWS::EC2::EIP
-        DependsOn: InternetGatewayAttachment
-        Properties:
-            Domain: vpc
+  AppSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !Ref AvailabilityZones ]
+      CidrBlock: !Select [ 1, !Ref AppSubnetCIDR ]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-app-2
 
-    NatGateway1:
-        Type: AWS::EC2::NatGateway
-        Properties:
-            AllocationId: !GetAtt NatGateway1EIP.AllocationId
-            SubnetId: !Ref AppSubnet1
+  AppSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !Ref AvailabilityZones ]
+      CidrBlock: !Select [ 2, !Ref AppSubnetCIDR ]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-app-3
 
-    NatGateway2:
-        Type: AWS::EC2::NatGateway
-        Properties:
-            AllocationId: !GetAtt NatGateway2EIP.AllocationId
-            SubnetId: !Ref AppSubnet3
+  AppAcl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-app
 
-    NatGateway3:
-        Type: AWS::EC2::NatGateway
-        Properties:
-            AllocationId: !GetAtt NatGateway3EIP.AllocationId
-            SubnetId: !Ref AppSubnet3
+  AppAclRule1:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: false
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 123
+        To: 123
+      Protocol: 17
+      RuleAction : allow
+      RuleNumber : 100
 
-    PublicRouteTable:
-        Type: AWS::EC2::RouteTable
-        Properties:
-            VpcId: !Ref VPC
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-public
+  AppAclRule2:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Egress: false
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 200
 
-    DefaultPublicRoute:
-        Type: AWS::EC2::Route
-        DependsOn: InternetGatewayAttachment
-        Properties:
-            RouteTableId: !Ref PublicRouteTable
-            DestinationCidrBlock: 0.0.0.0/0
-            GatewayId: !Ref InternetGateway
+  AppAclRule3:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 192.168.255.0/24
+      Egress: false
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 22
+        To: 22
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 700
 
-    PublicSubnet1RouteTableAssociation:
-        Type: AWS::EC2::SubnetRouteTableAssociation
-        Properties:
-            RouteTableId: !Ref PublicRouteTable
-            SubnetId: !Ref PublicSubnet1
+  AppAclRule4:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 123
+        To: 123
+      Protocol: 17
+      RuleAction : allow
+      RuleNumber : 100
 
-    PublicSubnet2RouteTableAssociation:
-        Type: AWS::EC2::SubnetRouteTableAssociation
-        Properties:
-            RouteTableId: !Ref PublicRouteTable
-            SubnetId: !Ref PublicSubnet2
+  AppAclRule5:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: !Ref LogForwarderPort
+        To: !Ref LogForwarderPort
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 101
 
-    PublicSubnet3RouteTableAssociation:
-        Type: AWS::EC2::SubnetRouteTableAssociation
-        Properties:
-            RouteTableId: !Ref PublicRouteTable
-            SubnetId: !Ref PublicSubnet3
+  AppAclRule6:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 200
 
-    AppRouteTable1:
-        Type: AWS::EC2::RouteTable
-        Properties:
-            VpcId: !Ref VPC
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-app-1
+  AppAclRule7:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 201
 
-    DefaultAppRoute1:
-        Type: AWS::EC2::Route
-        Properties:
-            RouteTableId: !Ref AppRouteTable1
-            DestinationCidrBlock: 0.0.0.0/0
-            NatGatewayId: !Ref NatGateway1
+  AppAclRule8:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Egress: true
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: !Ref DbPort
+        To: !Ref DbPort
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 300
 
-    AppSubnet1RouteTableAssociation:
-        Type: AWS::EC2::SubnetRouteTableAssociation
-        Properties:
-            RouteTableId: !Ref AppRouteTable1
-            SubnetId: !Ref AppSubnet1
+  AppAclRule9:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: false
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 1024
+        To: 65535
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 900
 
-    AppRouteTable2:
-        Type: AWS::EC2::RouteTable
-        Properties:
-            VpcId: !Ref VPC
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-app-2
+  AppAclRule10:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 1024
+        To: 65535
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 900
 
-    DefaultAppRoute2:
-        Type: AWS::EC2::Route
-        Properties:
-            RouteTableId: !Ref AppRouteTable2
-            DestinationCidrBlock: 0.0.0.0/0
-            NatGatewayId: !Ref NatGateway2
+  AppAclRuleAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref AppSubnet1
+      NetworkAclId: !Ref AppAcl
 
-    AppSubnet2RouteTableAssociation:
-        Type: AWS::EC2::SubnetRouteTableAssociation
-        Properties:
-            RouteTableId: !Ref AppRouteTable2
-            SubnetId: !Ref AppSubnet2
+  AppAclRuleAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref AppSubnet2
+      NetworkAclId: !Ref AppAcl
 
-    AppRouteTable3:
-        Type: AWS::EC2::RouteTable
-        Properties:
-            VpcId: !Ref VPC
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-app-3
+  AppAclRuleAssociation3:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref AppSubnet3
+      NetworkAclId: !Ref AppAcl
 
-    DefaultAppRoute3:
-        Type: AWS::EC2::Route
-        Properties:
-            RouteTableId: !Ref AppRouteTable3
-            DestinationCidrBlock: 0.0.0.0/0
-            NatGatewayId: !Ref NatGateway3
+  DataSubnet1:
+    Type: AWS::EC2::Subnet
+    Condition: CreateThreeTier
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !Ref AvailabilityZones ]
+      CidrBlock: !Select [ 0, !Ref DataSubnetCIDR ]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-data-1
 
-    PrivateSubnet3RouteTableAssociation:
-        Type: AWS::EC2::SubnetRouteTableAssociation
-        Properties:
-            RouteTableId: !Ref AppRouteTable3
-            SubnetId: !Ref AppSubnet3
+  DataSubnet2:
+    Type: AWS::EC2::Subnet
+    Condition: CreateThreeTier
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !Ref AvailabilityZones ]
+      CidrBlock: !Select [ 1, !Ref DataSubnetCIDR ]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-data-2
 
-    DataRouteTable:
-        Type: AWS::EC2::RouteTable
-        Properties:
-            VpcId: !Ref VPC
-            Tags:
-                - Key: Name
-                  Value: !Sub ${EnvironmentName}-data
+  DataSubnet3:
+    Type: AWS::EC2::Subnet
+    Condition: CreateThreeTier
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !Ref AvailabilityZones ]
+      CidrBlock: !Select [ 2, !Ref DataSubnetCIDR ]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-data-3
 
-    DataSubnet1RouteTableAssociation:
-        Type: AWS::EC2::SubnetRouteTableAssociation
-        Condition: CreateThreeTier
-        Properties:
-            RouteTableId: !Ref DataRouteTable
-            SubnetId: !Ref DataSubnet1
+  DataAcl:
+    Type: AWS::EC2::NetworkAcl
+    Condition: CreateThreeTier
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-data
 
-    DataSubnet2RouteTableAssociation:
-        Type: AWS::EC2::SubnetRouteTableAssociation
-        Condition: CreateThreeTier
-        Properties:
-            RouteTableId: !Ref DataRouteTable
-            SubnetId: !Ref DataSubnet2
+  DataAclRule1:
+    Type: AWS::EC2::NetworkAclEntry
+    Condition: CreateThreeTier
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: false
+      NetworkAclId: !Ref VpcCIDR
+      PortRange:
+        From: !Ref DbPort
+        To: !Ref DbPort
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 300
 
-    DataSubnet3RouteTableAssociation:
-        Type: AWS::EC2::SubnetRouteTableAssociation
-        Condition: CreateThreeTier
-        Properties:
-            RouteTableId: !Ref DataRouteTable
-            SubnetId: !Ref DataSubnet3
+  DataAclRuleAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Condition: CreateThreeTier
+    Properties:
+      SubnetId: !Ref DataSubnet1
+      NetworkAclId: !Ref DataAcl
+
+  DataAclRuleAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Condition: CreateThreeTier
+    Properties:
+      SubnetId: !Ref DataSubnet2
+      NetworkAclId: !Ref DataAcl
+
+  DataAclRuleAssociation3:
+    Condition: CreateThreeTier
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref DataSubnet3
+      NetworkAclId: !Ref DataAcl
+
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway3EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref AppSubnet1
+
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway2EIP.AllocationId
+      SubnetId: !Ref AppSubnet3
+
+  NatGateway3:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway3EIP.AllocationId
+      SubnetId: !Ref AppSubnet3
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-public
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+
+  PublicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet3
+
+  AppRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-app-1
+
+  DefaultAppRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref AppRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+
+  AppSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref AppRouteTable1
+      SubnetId: !Ref AppSubnet1
+
+  AppRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-app-2
+
+  DefaultAppRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref AppRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2
+
+  AppSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref AppRouteTable2
+      SubnetId: !Ref AppSubnet2
+
+  AppRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-app-3
+
+  DefaultAppRoute3:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref AppRouteTable3
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway3
+
+  AppSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref AppRouteTable3
+      SubnetId: !Ref AppSubnet3
+
+  DataRouteTable:
+    Type: AWS::EC2::RouteTable
+    Condition: CreateThreeTier
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-data
+
+  DataSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateThreeTier
+    Properties:
+      RouteTableId: !Ref DataRouteTable
+      SubnetId: !Ref DataSubnet1
+
+  DataSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateThreeTier
+    Properties:
+      RouteTableId: !Ref DataRouteTable
+      SubnetId: !Ref DataSubnet2
+
+  DataSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateThreeTier
+    Properties:
+      RouteTableId: !Ref DataRouteTable
+      SubnetId: !Ref DataSubnet3
 
 Outputs:
 
-    VPC:
-        Description: A reference to the created VPC
-        Value: !Ref VPC
+  VPC:
+    Description: A reference to the created VPC
+    Value: !Ref VPC
 
-    PublicSubnets:
-        Description: A list of the public subnets
-        Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2, !Ref PublicSubnet3 ]]
+  PublicSubnets:
+    Description: A list of the public subnets
+    Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2, !Ref PublicSubnet3 ]]
 
-    AppSubnets:
-        Description: A list of the app subnets
-        Value: !Join [ ",", [ !Ref AppSubnet1, !Ref AppSubnet2, !Ref AppSubnet3 ]]
+  AppSubnets:
+    Description: A list of the app subnets
+    Value: !Join [ ",", [ !Ref AppSubnet1, !Ref AppSubnet2, !Ref AppSubnet3 ]]
 
-    DataSubnets:
-        Condition: CreateThreeTier
-        Description: A list of the data subnets
-        Value: !Join [ ",", [ !Ref DataSubnet1, !Ref DataSubnet2, !Ref DataSubnet3 ]]
+  DataSubnets:
+    Condition: CreateThreeTier
+    Description: A list of the data subnets
+    Value: !Join [ ",", [ !Ref DataSubnet1, !Ref DataSubnet2, !Ref DataSubnet3 ]]
