@@ -1,8 +1,20 @@
 # ops-cloudformation
 
 ## Usage
-  -  `make create`
-  -  `make delete`
+  - If the stack already exists it will update it, otherwise it will create a new one, the default region is ap-southeast-2 if not specified
+  ```
+    make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json
+  ```
+
+  -   (Optional) you can specify the region where you want to create or update the stack  
+  ```
+    make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json DEFAULT_REGION=us-west-2
+  ```
+
+  - Delete a stack, you can also specify the region
+  ```
+    make deleteStack STACK_NAME=foo DEFAULT_REGION=us-west-2
+  ```
 
 ## Network
 
