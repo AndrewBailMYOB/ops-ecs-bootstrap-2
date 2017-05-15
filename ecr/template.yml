@@ -19,7 +19,7 @@ Resources:
             Effect: Allow
             Principal:
               AWS:
-                - "arn:aws:iam::693429498512:adfs-ex-central-development-poweruser/*"
+                - "arn:aws:iam::693429498512:role/adfs-ex-central-development-poweruser"
             Action:
               - "ecr:GetDownloadUrlForLayer"
               - "ecr:BatchGetImage"
