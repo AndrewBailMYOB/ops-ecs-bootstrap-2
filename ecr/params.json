@@ -1,6 +1,6 @@
 [
   {
     "ParameterKey": "RepositoryName",
-    "ParameterValue": "pe-registry"
+    "ParameterValue": "platform-enablement/managed"
   }
 ]
