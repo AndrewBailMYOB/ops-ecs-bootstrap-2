@@ -33,7 +33,7 @@ poll_timeout=5
 
 [[ $(stat -c %s $stack_tmpl) -gt "0" ]]     || die "template is zero bytes"
 [[ $(stat -c %s $stack_tmpl) -lt "51200" ]] || die "template is too big"
-[[ $(stat -c %s $stack_params) -gt "0" ]]   || die "template is zero bytes"
+[[ $(stat -c %s $stack_params) -gt "0" ]]   || die "params file is zero bytes"
 
 # polls aws for stack status
 wait_completion() {
