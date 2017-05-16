@@ -1,0 +1,38 @@
+[
+  {
+    "ParameterKey": "InstanceType",
+    "ParameterValue": "t2.medium"
+  },
+  {
+    "ParameterKey": "AlbIngress",
+    "ParameterValue": "0.0.0.0/0"
+  },
+  {
+    "ParameterKey": "SSHKeyName",
+    "ParameterValue": "oerazo"
+  },
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-640cb600"
+  },
+  {
+    "ParameterKey": "PrivateSubnets",
+    "ParameterValue": "subnet-c92a6bad, subnet-ad2248db, subnet-5320a70a"
+  },
+  {
+    "ParameterKey": "EcsAMI",
+    "ParameterValue": "ami-fbe9eb98"
+  },
+  {
+    "ParameterKey": "ASGMaxSize",
+    "ParameterValue": "2"
+  },
+  {
+    "ParameterKey": "ASGMinSize",
+    "ParameterValue": "0"
+  },
+  {
+    "ParameterKey": "ASGDesiredSize",
+    "ParameterValue": "1"
+  }
+]

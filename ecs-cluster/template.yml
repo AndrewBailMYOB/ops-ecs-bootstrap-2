@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Provides shared ECS cluster to be used by a tribe.
+
+Parameters:
+  InstanceRole:
+    Type: String
+    Description: The IAM instance role to be used
+    Default: buildkite-central-dev-agents-Role
+  InstanceType:
+    Type: String
+    Description: The EC2 instance type to host docker
+    Default: t2.xlarge
+  AlbIngress:
+    Type: String
+    Description: An origin CIDR for incoming traffic
+  SSHKeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: For SSH Access
+  VpcId:
+    Type: String
+    Description: Vpc id to be used for security groups and ecs.
+  PrivateSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: List of private subnet Ids.
+  EcsAMI:
+    Type: String
+    Description: Ecs AMI to use for the launch config.
+  ASGMaxSize:
+    Type: Number
+    Description: Max allowed size for our AutoScaling group.
+    Default: 1
+  ASGMinSize:
+    Type: Number
+    Description: Minimum allowed size for our autoscalling group.
+    Default: 0
+  ASGDesiredSize:
+    Type: Number
+    Description: Desired capacity for our autoscalling group.
+    Default: 1
+
+Resources:
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref InstanceRole
+
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 30
+
+  LaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref EcsAMI
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref InstanceProfile
+      KeyName: !Ref SSHKeyName
+      SecurityGroups:
+      - !Ref SecurityGroup
+      UserData: !Base64
+        Fn::Sub: |
+          #!/bin/bash
+          yum update -y
+          yum install -y aws-cli
+          REGION=$( curl --silent http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/[a-z]$//' )
+          # set up the ECS config
+          cat >> /etc/ecs/ecs.config <<EoConf
+          ECS_CLUSTER=${ECSCluster}
+          EoConf
+          # set up the default log driver to talk to CloudWatch
+          cat >> /etc/sysconfig/docker <<EoDC
+          OPTIONS="\$OPTIONS --log-driver=awslogs --log-opt awslogs-region=${AWS::Region} --log-opt awslogs-group=${LogGroup}"
+          EoDC
+          stop ecs
+          start ecs
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MaxBatchSize: 1
+        MinInstancesInService: 0
+    Properties:
+      LaunchConfigurationName: !Ref LaunchConfiguration
+      VPCZoneIdentifier: !Ref PrivateSubnets
+      MaxSize: !Ref ASGMaxSize
+      MinSize: !Ref ASGMinSize
+      DesiredCapacity: !Ref ASGDesiredSize
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}
+        PropagateAtLaunch: true
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Permit traffic from ALB
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 32768
+        ToPort: 61000
+        SourceSecurityGroupId: !Ref ALBSecurityGroup
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Permit traffic to ALB
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: !Ref AlbIngress
+
+Outputs:
+  OpsECSCluster:
+    Value: !Ref ECSCluster
+    Description: "Outputs the name of the ecs cluster"
+    Export:
+      Name: OpsECSCluster
+  OpsALBSecurityGroup:
+    Value: !Ref ALBSecurityGroup
+    Description: "Outputs the ID of the ALB security group"
+    Export:
+      Name: OpsALBSecurityGroup
