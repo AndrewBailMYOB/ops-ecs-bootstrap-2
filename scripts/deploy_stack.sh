@@ -1,73 +1,101 @@
 #!/bin/bash
 
-stackName=$1
-stackTemplateFile=$2
-stackParamsFile=$3
+usage() {
+    echo "usage: $0 stack_name template_path params_file_path"
+    exit 0
+}
 
 log () {
-  date "+%Y-%m-%d %H:%M:%S $1"
+    ts="$(date '+%Y-%m-%d %H:%M:%S')"
+    echo "$ts $*"
 }
 
 die () {
-  echo "FATAL: $1"
+  echo "FATAL: $*" >&2
   exit 1
 }
 
-wait_completion () {
-  local stackName=$1
-  echo -n "Waiting for stack $stackName to complete:"
-  while true; do
-    local status=$( aws cloudformation describe-stack-events \
-        --stack-name $stackName \
-        --query 'StackEvents[].{x: ResourceStatus, y: ResourceType}' \
-        --output text | \
-        grep "AWS::CloudFormation::Stack" | head -n 1 | awk '{ print $1 }'
-      )
-      case $status in
-        UPDATE_COMPLETE_CLEANUP_IN_PROGRESS)    : ;;
-        UPDATE_COMPLETE|CREATE_COMPLETE)
-          echo "stack $stackName complete"
-          return 0 ;;
-        *ROLLBACK*)
-          echo "stack $stackName rolling back"
-          return 1 ;;
-        *FAILED*)
-          echo "ERROR creating or updating stack"
-          return 1 ;;
-        "")
-          echo "No output while looking for stack completion"
-          return 1 ;;
-        *) : ;;
-      esac
-      echo -n "."
-      sleep 5
-  done
+[[ "$#" == "3" ]] || usage
+
+hash aws 2>/dev/null || { echo "Error: missing 'awscli' dependency."; exit 2; }
+hash jq  2>/dev/null || { echo "Error: missing 'jq' dependency."; exit 2; }
+
+stack_name="$1"
+stack_tmpl="$2"
+stack_params="$3"
+poll_timeout=5
+
+# NOTE: this isn't quite the same as AWS' check, but it's close
+[[ "$stack_name" =~ [^-a-zA-Z0-9] ]] && die "bad stack name"
+
+[[ -f $stack_tmpl ]]   || die "template is not a file"
+[[ -f $stack_params ]] || die "params is not a file"
+
+[[ $(stat -c %s $stack_tmpl) -gt "0" ]]     || die "template is zero bytes"
+[[ $(stat -c %s $stack_tmpl) -lt "51200" ]] || die "template is too big"
+[[ $(stat -c %s $stack_params) -gt "0" ]]   || die "template is zero bytes"
+
+# polls aws for stack status
+wait_completion() {
+    local stack_name="$1"
+    echo -n "Waiting for \"$stack_name\":"
+    while true; do
+        local status=$(aws cloudformation describe-stack-events \
+            --stack-name $stack_name \
+            --query 'StackEvents[].{x: ResourceStatus, y: ResourceType}' \
+            --output text | \
+            grep "AWS::CloudFormation::Stack" | head -n 1 | awk '{ print $1 }'
+        )
+        case "$status" in
+            UPDATE_COMPLETE_CLEANUP_IN_PROGRESS)
+                ;;
+            UPDATE_COMPLETE|CREATE_COMPLETE)
+                echo "."
+                echo "Complete"
+                return 0
+                ;;
+            *ROLLBACK*)
+                echo "."
+                echo "Rolling back"
+                return 1
+                ;;
+            *FAILED*)
+                echo "."
+                echo "FAILED"
+                return 1
+                ;;
+            "")
+                echo "."
+                echo "NO OUTPUT"
+                return 1
+                ;;
+            *)
+                ;;
+        esac
+        echo -n "."
+        sleep $poll_timeout
+    done
 }
 
-aws_stack () {
-  local action=$1
-  local stackName=$2
-  local stackTemplateFile=$3
-  local stackParamsFile=$4
+# creates or updates a stack
+stack_ctl() {
+    local action="$1"
+    log "name=$stack_name action=$action"
 
-  log "$action $stackName"
+    aws cloudformation $action \
+        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+        --stack-name $stack_name \
+        --template-body file://$stack_tmpl \
+        --parameters file://$stack_params >/dev/null
 
-  aws cloudformation $action \
-    --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-    --stack-name $stackName \
-    --template-body ${stackTemplateFile} \
-    --parameters ${stackParamsFile} > /dev/null
-
-  wait_completion $stackName || return 1
+    wait_completion $stack_name || return 1
 }
 
-#Create or update the stack
-if [ -z "$( aws cloudformation describe-stacks --stack-name $stackName 2>/dev/null )" ]; then
-  action="create-stack --disable-rollback"
-else
-  action="update-stack"
-fi
+action="create-stack --disable-rollback"
+while read -r; do
+    [[ "$REPLY" == "$stack_name" ]] && { action="update-stack"; break; }
+done < <(aws cloudformation describe-stacks|jq -Mr '.Stacks[].StackName')
 
-aws_stack "$action" "$stackName" "$stackTemplateFile" "$stackParamsFile" || die "Can't update stack"
+stack_ctl "$action" || die "something went wrong :("
 
-log "Complete"
+log "Complete: name=$stack_name action=$action"
