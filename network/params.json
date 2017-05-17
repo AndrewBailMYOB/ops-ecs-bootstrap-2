@@ -13,15 +13,15 @@
   },
   {
     "ParameterKey": "PublicSubnetCIDR",
-    "ParameterValue": "192.168.0.0/20,192.168.1.0/20,192.168.2.0/20"
+    "ParameterValue": "192.168.0.0/20,192.168.15.0/20,192.168.31.0/20"
   },
   {
     "ParameterKey": "AppSubnetCIDR",
-    "ParameterValue": "192.168.10.0/20,192.168.11.0/20,192.168.12.0/20"
+    "ParameterValue": "192.168.100.0/20,192.168.115.0/20,192.168.131.0/20"
   },
   {
     "ParameterKey": "DataSubnetCIDR",
-    "ParameterValue": "192.168.20.0/20,192.168.21.0/20,192.168.22.0/20"
+    "ParameterValue": "192.168.200.0/20,192.168.215.0/20,192.168.231.0/20"
   },
   {
     "ParameterKey": "VpcFlowLogRetention",
