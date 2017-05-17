@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage() {
-    echo "usage: $0 stack_name template_path params_file_path"
+    echo "usage: $0 [stack_name] [template_file_path] [params_file_path]"
     exit 0
 }
 
@@ -18,7 +18,6 @@ die () {
 [[ "$#" == "3" ]] || usage
 
 hash aws 2>/dev/null || { echo "Error: missing 'awscli' dependency."; exit 2; }
-hash jq  2>/dev/null || { echo "Error: missing 'jq' dependency."; exit 2; }
 
 stack_name="$1"
 stack_tmpl="$2"
@@ -91,10 +90,13 @@ stack_ctl() {
     wait_completion $stack_name || return 1
 }
 
+# validate the template first
+aws cloudformation validate-template --template-body file://$stack_tmpl >/dev/null 2>&1 || die "invalid template"
+
 action="create-stack --disable-rollback"
 while read -r; do
     [[ "$REPLY" == "$stack_name" ]] && { action="update-stack"; break; }
-done < <(aws cloudformation describe-stacks|jq -Mr '.Stacks[].StackName')
+done < <(aws cloudformation describe-stacks --query 'Stacks[*].[StackName]' --output text)
 
 stack_ctl "$action" || die "something went wrong :("
 
