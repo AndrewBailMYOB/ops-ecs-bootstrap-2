@@ -15,6 +15,8 @@ die () {
   exit 1
 }
 
+: "${AWS_DEFAULT_REGION?Export AWS_DEFAULT_REGION and try again}"
+
 [[ "$#" == "3" ]] || usage
 
 hash aws 2>/dev/null || { echo "Error: missing 'awscli' dependency."; exit 2; }
