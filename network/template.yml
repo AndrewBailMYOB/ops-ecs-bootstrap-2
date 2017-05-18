@@ -166,7 +166,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-public
+          Value: !Sub ${EnvironmentName}-public-acl
 
   PublicAclRule1:
     Type: AWS::EC2::NetworkAclEntry
@@ -185,16 +185,42 @@ Resources:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: !Ref VpcCIDR
-      Egress: true
+      Egress: false
       NetworkAclId: !Ref PublicAcl
       PortRange:
         From: 80
         To: 80
       Protocol: 6
       RuleAction : allow
-      RuleNumber : 100
+      RuleNumber : 101
 
   PublicAclRule3:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: false
+      NetworkAclId: !Ref PublicAcl
+      PortRange:
+        From: 22
+        To: 22
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 700
+
+  PublicAclRule4:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Egress: false
+      NetworkAclId: !Ref PublicAcl
+      PortRange:
+        From: 1024
+        To: 65535
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 900
+
+  PublicAclRule5:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: !Ref VpcCIDR
@@ -205,7 +231,72 @@ Resources:
         To: 443
       Protocol: 6
       RuleAction : allow
+      RuleNumber : 100
+  
+  PublicAclRule6:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Egress: true
+      NetworkAclId: !Ref PublicAcl
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: 6
+      RuleAction : allow
       RuleNumber : 101
+  
+  PublicAclRule7:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref PublicAcl
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 102
+  
+  PublicAclRule8:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref PublicAcl
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 103
+
+  PublicAclRule9:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Egress: true
+      NetworkAclId: !Ref PublicAcl
+      PortRange:
+        From: 22
+        To: 22
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 700
+  
+  PublicAclRule10:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Egress: true
+      NetworkAclId: !Ref PublicAcl
+      PortRange:
+        From: 1024
+        To: 65535
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 900
 
   PublicAclRuleAssociation1:
     Type: AWS::EC2::SubnetNetworkAclAssociation
@@ -264,7 +355,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-app
+          Value: !Sub ${EnvironmentName}-app-acl
 
   AppAclRule1:
     Type: AWS::EC2::NetworkAclEntry
@@ -291,11 +382,24 @@ Resources:
       Protocol: 6
       RuleAction : allow
       RuleNumber : 200
-
+  
   AppAclRule3:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
-      CidrBlock: 192.168.255.0/24
+      CidrBlock: !Ref VpcCIDR
+      Egress: false
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 201
+
+  AppAclRule4:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: !Ref VpcCIDR
       Egress: false
       NetworkAclId: !Ref AppAcl
       PortRange:
@@ -304,8 +408,34 @@ Resources:
       Protocol: 6
       RuleAction : allow
       RuleNumber : 700
+  
+  AppAclRule5:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: false
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 1024
+        To: 65535
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 900
 
-  AppAclRule4:
+  AppAclRule6:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      Egress: false
+      NetworkAclId: !Ref AppAcl
+      PortRange:
+        From: 1024
+        To: 65535
+      Protocol: 6
+      RuleAction : allow
+      RuleNumber : 901
+
+  AppAclRule7:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: 0.0.0.0/0
@@ -318,7 +448,7 @@ Resources:
       RuleAction : allow
       RuleNumber : 100
 
-  AppAclRule5:
+  AppAclRule8:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: 0.0.0.0/0
@@ -331,7 +461,7 @@ Resources:
       RuleAction : allow
       RuleNumber : 101
 
-  AppAclRule6:
+  AppAclRule9:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: 0.0.0.0/0
@@ -344,7 +474,7 @@ Resources:
       RuleAction : allow
       RuleNumber : 200
 
-  AppAclRule7:
+  AppAclRule10:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: 0.0.0.0/0
@@ -357,7 +487,7 @@ Resources:
       RuleAction : allow
       RuleNumber : 201
 
-  AppAclRule8:
+  AppAclRule11:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: !Ref VpcCIDR
@@ -370,7 +500,7 @@ Resources:
       RuleAction : allow
       RuleNumber : 300
 
-  AppAclRule9:
+  AppAclRule12:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: 0.0.0.0/0
@@ -383,10 +513,10 @@ Resources:
       RuleAction : allow
       RuleNumber : 900
 
-  AppAclRule10:
+  AppAclRule13:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
-      CidrBlock: 0.0.0.0/0
+      CidrBlock: !Ref VpcCIDR
       Egress: true
       NetworkAclId: !Ref AppAcl
       PortRange:
@@ -394,7 +524,7 @@ Resources:
         To: 65535
       Protocol: 6
       RuleAction : allow
-      RuleNumber : 900
+      RuleNumber : 901
 
   AppAclRuleAssociation1:
     Type: AWS::EC2::SubnetNetworkAclAssociation
@@ -494,41 +624,17 @@ Resources:
       SubnetId: !Ref DataSubnet3
       NetworkAclId: !Ref DataAcl
 
-  NatGateway1EIP:
+  NatGatewayEIP:
     Type: AWS::EC2::EIP
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
 
-  NatGateway2EIP:
-    Type: AWS::EC2::EIP
-    DependsOn: InternetGatewayAttachment
-    Properties:
-      Domain: vpc
-
-  NatGateway3EIP:
-    Type: AWS::EC2::EIP
-    DependsOn: InternetGatewayAttachment
-    Properties:
-      Domain: vpc
-
-  NatGateway1:
+  NatGateway:
     Type: AWS::EC2::NatGateway
     Properties:
-      AllocationId: !GetAtt NatGateway1EIP.AllocationId
-      SubnetId: !Ref AppSubnet1
-
-  NatGateway2:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId: !GetAtt NatGateway2EIP.AllocationId
-      SubnetId: !Ref AppSubnet3
-
-  NatGateway3:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId: !GetAtt NatGateway3EIP.AllocationId
-      SubnetId: !Ref AppSubnet3
+      AllocationId: !GetAtt NatGatewayEIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
 
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
@@ -536,9 +642,9 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-public
+          Value: !Sub ${EnvironmentName}-public-route
 
-  DefaultPublicRoute:
+  PublicRoute:
     Type: AWS::EC2::Route
     DependsOn: InternetGatewayAttachment
     Properties:
@@ -564,67 +670,41 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet3
 
-  AppRouteTable1:
+  AppRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-app-1
+          Value: !Sub ${EnvironmentName}-app-route
 
-  DefaultAppRoute1:
+  AppRoute:
     Type: AWS::EC2::Route
+    DependsOn: NatGateway
     Properties:
-      RouteTableId: !Ref AppRouteTable1
+      RouteTableId: !Ref AppRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway1
+      NatGatewayId: !Ref NatGateway
 
   AppSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: AppRoute
     Properties:
-      RouteTableId: !Ref AppRouteTable1
+      RouteTableId: !Ref AppRouteTable
       SubnetId: !Ref AppSubnet1
-
-  AppRouteTable2:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub ${EnvironmentName}-app-2
-
-  DefaultAppRoute2:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref AppRouteTable2
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway2
 
   AppSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: AppRoute
     Properties:
-      RouteTableId: !Ref AppRouteTable2
+      RouteTableId: !Ref AppRouteTable
       SubnetId: !Ref AppSubnet2
-
-  AppRouteTable3:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub ${EnvironmentName}-app-3
-
-  DefaultAppRoute3:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref AppRouteTable3
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway3
 
   AppSubnet3RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: AppRoute
     Properties:
-      RouteTableId: !Ref AppRouteTable3
+      RouteTableId: !Ref AppRouteTable
       SubnetId: !Ref AppSubnet3
 
   DataRouteTable:
