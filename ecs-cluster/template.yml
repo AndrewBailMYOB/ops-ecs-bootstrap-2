@@ -5,7 +5,7 @@ Parameters:
   InstanceRole:
     Type: String
     Description: The IAM instance role to be used
-    Default: buildkite-central-dev-agents-Role
+    Default: ops-poc-ecs
   InstanceType:
     Type: String
     Description: The EC2 instance type to host docker
@@ -61,6 +61,7 @@ Resources:
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref SSHKeyName
+      AssociatePublicIpAddress: True
       SecurityGroups:
       - !Ref SecurityGroup
       UserData: !Base64
@@ -68,7 +69,6 @@ Resources:
           #!/bin/bash
           yum update -y
           yum install -y aws-cli
-          REGION=$( curl --silent http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/[a-z]$//' )
           # set up the ECS config
           cat >> /etc/ecs/ecs.config <<EoConf
           ECS_CLUSTER=${ECSCluster}

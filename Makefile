@@ -9,7 +9,7 @@ export AWS_DEFAULT_REGION := $(REGION)
 .PHONY: buildStack deleteStack help
 
 help:
-	@echo "make buildStack STACK_NAME=<stackName> CFN_LOCATION=<Cloudformation template location> CFN_PARAMETERS=<Parameters json file location> DEFAULTREGION=aws_region (optional if region=ap-souteast-2"
+	@echo "make buildStack STACK_NAME=<stackName> CFN_LOCATION=<Cloudformation template location> CFN_PARAMS=<Parameters json file location> DEFAULTREGION=aws_region (optional if region=ap-souteast-2"
 
 buildStack:
 	./scripts/deploy_stack.sh $(STACK_NAME) $(STACK_TEMPLATE_FILE) $(STACK_PARAMS_FILE)
