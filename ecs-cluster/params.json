@@ -17,7 +17,7 @@
   },
   {
     "ParameterKey": "PrivateSubnets",
-    "ParameterValue": "subnet-c92a6bad, subnet-ad2248db, subnet-5320a70a"
+    "ParameterValue": "subnet-5320a70a"
   },
   {
     "ParameterKey": "EcsAMI",
