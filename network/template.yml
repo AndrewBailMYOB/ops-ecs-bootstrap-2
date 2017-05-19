@@ -112,7 +112,7 @@ Resources:
     Type: AWS::EC2::FlowLog
     Properties:
       DeliverLogsPermissionArn : !GetAtt FlowLogRole.Arn
-      LogGroupName : CloudWatchLogGroup
+      LogGroupName : !Ref CloudWatchLogGroup
       ResourceId : !Ref VPC
       ResourceType : VPC
       TrafficType : ALL
