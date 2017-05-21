@@ -6,7 +6,6 @@ specific to an application. These should be managed in a different stack.
 
 See below for a logical diagram of what is created:
 ```
-
 +-------------+
 | ECS Cluster |
 +------+------+
