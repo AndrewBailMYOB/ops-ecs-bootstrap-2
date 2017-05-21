@@ -1,8 +1,8 @@
 # ECS Stack
 This stack creates a base ECS structure which can be built upon.
 
-Task definitions and ECS services are not created as these comopnents
-are specific to an application. These should be managed in a different stack.
+Task definitions and ECS services are not created as these comopnents are
+specific to an application. These should be managed in a different stack.
 
 See below for a logical diagram of what is created:
 ```
@@ -12,17 +12,17 @@ See below for a logical diagram of what is created:
 +------+------+
        |
        |
-       |        +-----------------------+       +---------------------+
-       +--------+ Launch Configuration  | <-----+  ECS-Optimized AMI  |
-                +---------+-------------+       +---------------------+
-                          |
-                          |
-                +---------+-------------+
+       |        +-----------------------+     +---------------------+
+       +------->| Launch Configuration  |<----|  ECS-Optimized AMI  |
+                +----------+------------+     +---------------------+
+                           |
+                           |
+                +----------+------------+
                 |   Auto Scaling Group  |
-                +---------+-------------+
-                          |
-                          |
-                +---------v-------------+
+                +----------+------------+
+                           |
+                           |
+                +----------+------------+
                 |     EC2 Instance      |
                 +-----------------------+
 ```
