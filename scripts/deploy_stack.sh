@@ -85,11 +85,11 @@ stack_ctl() {
     local action="$1"
     log "name=$stack_name action=$action"
 
-    aws cloudformation "$action" \
+    aws cloudformation $action \
         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
         --stack-name "$stack_name" \
-        --template-body file://"$stack_tmpl" \
-        --parameters file://"$stack_params" >/dev/null
+        --template-body "file://$stack_tmpl" \
+        --parameters "file://$stack_params" > /dev/null
 
     wait_completion "$stack_name" || return 1
 }
