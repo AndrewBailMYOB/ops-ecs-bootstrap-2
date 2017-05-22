@@ -15,6 +15,8 @@ die () {
   exit 1
 }
 
+ostype="`uname -s`"
+
 : "${AWS_DEFAULT_REGION?Export AWS_DEFAULT_REGION and try again}"
 
 [[ "$#" == "3" ]] || usage
@@ -32,9 +34,11 @@ poll_timeout=5
 [[ -f $stack_tmpl ]]   || die "template is not a file"
 [[ -f $stack_params ]] || die "params is not a file"
 
-[[ $(stat -c %s $stack_tmpl) -gt "0" ]]     || die "template is zero bytes"
-[[ $(stat -c %s $stack_tmpl) -lt "51200" ]] || die "template is too big"
-[[ $(stat -c %s $stack_params) -gt "0" ]]   || die "params file is zero bytes"
+statcmd="stat -c %s"
+[[ $ostype == "Darwin" ]] && statcmd="stat -f \"%z\""
+[[ $($statcmd $stack_tmpl) -gt "0" ]]     || die "template is zero bytes"
+[[ $($statcmd $stack_tmpl) -lt "51200" ]] || die "template is too big"
+[[ $($statcmd $stack_params) -gt "0" ]]   || die "params file is zero bytes"
 
 # polls aws for stack status
 wait_completion() {
