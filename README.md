@@ -14,16 +14,24 @@ created.
 
 ## Examples
 * Get help:
-`make help`
+```bash
+make help
+```
 
 * Build out the default network stack:
-`make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json`
+```bash
+make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json
+```
 
 * Optionally supply a region:
-`make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json DEFAULT_REGION=us-west-2`
+```bash
+make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json DEFAULT_REGION=us-west-2
+```
 
 * Delete a stack:
-`make deleteStack STACK_NAME=foo DEFAULT_REGION=us-west-2`
+```bash
+make deleteStack STACK_NAME=foo DEFAULT_REGION=us-west-2
+```
 
 ## Bundled Stacks
 Some default stacks are provided; see the following for further information:
