@@ -35,7 +35,7 @@ poll_timeout=5
 [[ -f $stack_params ]] || die "params is not a file"
 
 statcmd="stat -c %s"
-[[ $ostype == "Darwin" ]] && statcmd="stat -f \"%z\""
+[[ $ostype == "Darwin" ]] && statcmd="stat -f %z"
 [[ $($statcmd $stack_tmpl) -gt "0" ]]     || die "template is zero bytes"
 [[ $($statcmd $stack_tmpl) -lt "51200" ]] || die "template is too big"
 [[ $($statcmd $stack_params) -gt "0" ]]   || die "params file is zero bytes"
