@@ -1,11 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Provides shared ECS cluster to be used by a tribe.
+Description: Provides shared ECS cluster to be used by a team.
 
 Parameters:
-  InstanceRole:
-    Type: String
-    Description: The IAM instance role to be used.
-    Default: ops-poc-ecs
   InstanceType:
     Type: String
     Description: The EC2 instance type to host Docker.
@@ -39,12 +35,32 @@ Parameters:
     Default: 1
 
 Resources:
-  InstanceProfile:
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ec2.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: ecs-service
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: ['ecs:CreateCluster', 'ecs:DeregisterContainerInstance', 'ecs:DiscoverPollEndpoint',
+              'ecs:Poll', 'ecs:RegisterContainerInstance', 'ecs:StartTelemetrySession',
+              'ecs:Submit*', 'logs:CreateLogStream', 'logs:PutLogEvents']
+            Resource: '*'
+
+  Ec2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
       Roles:
-      - !Ref InstanceRole
+      - !Ref EC2Role
 
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -59,7 +75,7 @@ Resources:
     Properties:
       ImageId: !Ref EcsAMI
       InstanceType: !Ref InstanceType
-      IamInstanceProfile: !Ref InstanceProfile
+      IamInstanceProfile: !Ref Ec2InstanceProfile
       KeyName: !Ref SSHKeyName
       AssociatePublicIpAddress: True
       SecurityGroups:
