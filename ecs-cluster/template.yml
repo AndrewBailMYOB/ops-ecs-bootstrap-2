@@ -4,38 +4,38 @@ Description: Provides shared ECS cluster to be used by a tribe.
 Parameters:
   InstanceRole:
     Type: String
-    Description: The IAM instance role to be used
+    Description: The IAM instance role to be used.
     Default: ops-poc-ecs
   InstanceType:
     Type: String
-    Description: The EC2 instance type to host docker
+    Description: The EC2 instance type to host Docker.
     Default: t2.xlarge
   AlbIngress:
     Type: String
-    Description: An origin CIDR for incoming traffic
+    Description: An origin CIDR for incoming traffic.
   SSHKeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: For SSH Access
   VpcId:
     Type: String
-    Description: Vpc id to be used for security groups and ecs.
+    Description: VPC ID to be used for security groups and ECS.
   PrivateSubnets:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: List of private subnet Ids.
+    Description: List of private subnet IDs.
   EcsAMI:
     Type: String
-    Description: Ecs AMI to use for the launch config.
+    Description: ECS AMI to use for the launch config.
   ASGMaxSize:
     Type: Number
-    Description: Max allowed size for our AutoScaling group.
+    Description: Max allowed size for the AutoScaling group.
     Default: 1
   ASGMinSize:
     Type: Number
-    Description: Minimum allowed size for our autoscalling group.
+    Description: Minimum allowed size for the AutoScaling group.
     Default: 0
   ASGDesiredSize:
     Type: Number
-    Description: Desired capacity for our autoscalling group.
+    Description: Desired capacity for the AutoScaling group.
     Default: 1
 
 Resources:
@@ -122,7 +122,7 @@ Resources:
 Outputs:
   OpsECSCluster:
     Value: !Ref ECSCluster
-    Description: "Outputs the name of the ecs cluster"
+    Description: "Outputs the name of the ECS cluster"
     Export:
       Name: OpsECSCluster
   OpsALBSecurityGroup:

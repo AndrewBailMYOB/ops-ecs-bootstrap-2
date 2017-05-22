@@ -1,33 +1,31 @@
-## Ecs Cluster Stack
+# ECS Stack
+This stack creates a base ECS structure which can be built upon.
 
-This stack will allow teams to create a cluster to host their applications, it does not create the task definition or the ecs service as that is considered particular to the applications teams will run, hence such services will be created in a separate stack
+Task definitions and ECS services are not created as these comopnents are
+specific to an application. These should be managed in a different stack.
 
-This is an overview of what this stack will create, it provides outputs that can be imported by other cloudformation stacks (like the service and task definition).
-
+See below for a logical diagram of what is created:
 ```
-+------------------------+
-|                        |
-|     ECS Cluster        |
-|                        |
-+-----------+------------+
-            |
-            |
-            |                       +-----------------------+              +---------------------+
-            |                       |                       |              |                     |
-            +-----------------------+  Launch Configuration | <------------+  ECS-Optimized AMI  |
-                                    +---------+-------------+              +---------------------+
-                                              |
-                                              |
-                                    +---------+-------------+
-                                    |                       |
-                                    |   Auto Scaling Group  |
-                                    +---------+-------------+
-                                              |
-                                              |
-                                    +---------v-------------+
-                                    |   Ec2 Instance        |
-                                    |                       |
-                                    +-----------------------+
++-------------+
+| ECS Cluster |
++------+------+
+       |
+       |
+       |        +-----------------------+     +---------------------+
+       +------->| Launch Configuration  |<----|  ECS-Optimized AMI  |
+                +----------+------------+     +---------------------+
+                           |
+                           |
+                +----------+------------+
+                |   Auto Scaling Group  |
+                +----------+------------+
+                           |
+                           |
+                +----------+------------+
+                |     EC2 Instance      |
+                +-----------------------+
 ```
 
-This stack will provide scaling policies (wip) to help manage the load, such policies are yet to be determined by the platform team based on our findings while rolling it out to the rest of the delivery teams.
+Outputs are defined which may be used in other stacks.
+
+The stack defines a basic scaling policy (WIP).

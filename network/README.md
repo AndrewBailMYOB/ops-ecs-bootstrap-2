@@ -1,6 +1,6 @@
 # Network stack
-
-Creates a VPC, subnets and other network resources with the minimum requirements you need to run an application.
+Creates a VPC, subnets, and other network resources with the minimum
+requirements you need to run an application.
 
 
 ## Network
