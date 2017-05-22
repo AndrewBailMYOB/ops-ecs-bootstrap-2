@@ -33,17 +33,18 @@ poll_timeout=5
 [[ -f $stack_params ]] || die "params is not a file"
 
 get_filesize() { wc -c <"$1"; }
-[[ $(get_filesize $stack_tmpl) -gt "0" ]]     || die "template is zero bytes"
-[[ $(get_filesize $stack_tmpl) -lt "51200" ]] || die "template is too big"
-[[ $(get_filesize $stack_params) -gt "0" ]]   || die "params file is zero bytes"
+[[ $(get_filesize "$stack_tmpl") -gt "0" ]]     || die "template is zero bytes"
+[[ $(get_filesize "$stack_tmpl") -lt "51200" ]] || die "template is too big"
+[[ $(get_filesize "$stack_params") -gt "0" ]]   || die "params file is zero bytes"
 
 # polls aws for stack status
 wait_completion() {
     local stack_name="$1"
+    local status
     echo -n "Waiting for \"$stack_name\":"
     while true; do
-        local status=$(aws cloudformation describe-stack-events \
-            --stack-name $stack_name \
+        status=$(aws cloudformation describe-stack-events \
+            --stack-name "$stack_name" \
             --query 'StackEvents[].{x: ResourceStatus, y: ResourceType}' \
             --output text | \
             grep "AWS::CloudFormation::Stack" | head -n 1 | awk '{ print $1 }'
@@ -84,17 +85,17 @@ stack_ctl() {
     local action="$1"
     log "name=$stack_name action=$action"
 
-    aws cloudformation $action \
+    aws cloudformation "$action" \
         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-        --stack-name $stack_name \
-        --template-body file://$stack_tmpl \
-        --parameters file://$stack_params >/dev/null
+        --stack-name "$stack_name" \
+        --template-body file://"$stack_tmpl" \
+        --parameters file://"$stack_params" >/dev/null
 
-    wait_completion $stack_name || return 1
+    wait_completion "$stack_name" || return 1
 }
 
 # validate the template first
-aws cloudformation validate-template --template-body file://$stack_tmpl >/dev/null 2>&1 || die "invalid template"
+aws cloudformation validate-template --template-body file://"$stack_tmpl" >/dev/null 2>&1 || die "invalid template"
 
 action="create-stack --disable-rollback"
 while read -r; do
