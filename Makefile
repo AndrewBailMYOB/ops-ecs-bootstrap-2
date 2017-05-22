@@ -6,7 +6,7 @@ STACK_PARAMS_FILE   := "$(CFN_PARAMS)"
 
 export AWS_DEFAULT_REGION := $(REGION)
 
-.PHONY: buildStack deleteStack help
+.PHONY: buildStack deleteStack help test-scripts
 
 help:
 	@echo "make buildStack STACK_NAME=<stackName> CFN_LOCATION=<Cloudformation template location> CFN_PARAMS=<Parameters json file location> DEFAULTREGION=aws_region (optional if region=ap-souteast-2"
@@ -19,3 +19,6 @@ deleteStack:
 		--stack-name $(STACK_NAME)
 	@echo "Waiting for stack deletion to complete ..."
 	aws cloudformation wait stack-delete-complete --stack-name $(STACK_NAME)
+
+test-scripts:
+	shellcheck scripts/*.sh
