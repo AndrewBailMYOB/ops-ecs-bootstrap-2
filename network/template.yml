@@ -45,13 +45,12 @@ Parameters:
   ThreeTier:
     Description: If true, create a data subnet.
     Type: String
-    Default: false
+    Default: true
 
 Conditions:
   CreateThreeTier: !Equals [!Ref ThreeTier, true]
 
 Resources:
-
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -603,7 +602,7 @@ Resources:
     Properties:
       CidrBlock: 0.0.0.0/0
       Egress: false
-      NetworkAclId: !Ref VpcCIDR
+      NetworkAclId: !Ref DataAcl
       PortRange:
         From: !Ref DbPort
         To: !Ref DbPort
