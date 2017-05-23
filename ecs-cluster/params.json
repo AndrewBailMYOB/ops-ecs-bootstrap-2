@@ -4,10 +4,6 @@
     "ParameterValue": "t2.medium"
   },
   {
-    "ParameterKey": "AlbIngress",
-    "ParameterValue": "0.0.0.0/0"
-  },
-  {
     "ParameterKey": "SSHKeyName",
     "ParameterValue": "oerazo"
   },
