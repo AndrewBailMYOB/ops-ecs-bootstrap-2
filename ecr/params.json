@@ -1,6 +1,6 @@
 [
   {
     "ParameterKey": "RepositoryName",
-    "ParameterValue": "platform-enablement/managed"
+    "ParameterValue": "platform-enablement/ecs-service"
   }
 ]

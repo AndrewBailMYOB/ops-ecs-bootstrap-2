@@ -1,5 +1,5 @@
 Description: >
-  This template creates an ECR repository.
+  This template creates an ECR repository
 
 Parameters:
   RepositoryName:
@@ -11,20 +11,3 @@ Resources:
     Type: "AWS::ECR::Repository"
     Properties:
       RepositoryName: !Ref RepositoryName
-      RepositoryPolicyText:
-        Version: "2012-10-17"
-        Statement:
-          -
-            Sid: AllowPushPull
-            Effect: Allow
-            Principal:
-              AWS:
-                - "arn:aws:iam::693429498512:role/adfs-ex-central-development-poweruser"
-            Action:
-              - "ecr:GetDownloadUrlForLayer"
-              - "ecr:BatchGetImage"
-              - "ecr:BatchCheckLayerAvailability"
-              - "ecr:PutImage"
-              - "ecr:InitiateLayerUpload"
-              - "ecr:UploadLayerPart"
-              - "ecr:CompleteLayerUpload"
