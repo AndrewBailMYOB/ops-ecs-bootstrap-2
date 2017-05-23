@@ -9,11 +9,11 @@
   },
   {
     "ParameterKey": "VpcId",
-    "ParameterValue": "vpc-640cb600"
+    "ParameterValue": "vpc-8fd14ceb"
   },
   {
     "ParameterKey": "PrivateSubnets",
-    "ParameterValue": "subnet-5320a70a"
+    "ParameterValue": "subnet-619ec705,subnet-c4ffb2b2,subnet-49eb7d10"
   },
   {
     "ParameterKey": "EcsAMI",
