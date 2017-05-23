@@ -1,0 +1,3 @@
+steps:
+  - label: Create temp network stack
+    command: make buildStack STACK_NAME=ecs-network-temp CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json
