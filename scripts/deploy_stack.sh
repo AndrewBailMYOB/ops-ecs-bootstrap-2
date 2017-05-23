@@ -83,9 +83,11 @@ wait_completion() {
 # creates or updates a stack
 stack_ctl() {
     local action="$1"
+    local arg=""
+    [[ "$action" == "create-stack" ]] && arg="--disable-rollback"
     log "name=$stack_name action=$action"
 
-    aws cloudformation $action \
+    aws cloudformation "$action" "$arg" \
         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
         --stack-name "$stack_name" \
         --template-body "file://$stack_tmpl" \
@@ -97,7 +99,7 @@ stack_ctl() {
 # validate the template first
 aws cloudformation validate-template --template-body file://"$stack_tmpl" >/dev/null 2>&1 || die "invalid template"
 
-action="create-stack --disable-rollback"
+action="create-stack"
 while read -r; do
     [[ "$REPLY" == "$stack_name" ]] && { action="update-stack"; break; }
 done < <(aws cloudformation describe-stacks --query 'Stacks[*].[StackName]' --output text)
