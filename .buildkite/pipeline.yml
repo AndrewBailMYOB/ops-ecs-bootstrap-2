@@ -10,3 +10,8 @@ steps:
     command: make deleteStack STACK_NAME=services-network-temp
     agents:
       queue: central-dev
+
+  - label: Create network stack
+    command: make buildStack STACK_NAME=services-network CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json
+    agents:
+      queue: central-dev
