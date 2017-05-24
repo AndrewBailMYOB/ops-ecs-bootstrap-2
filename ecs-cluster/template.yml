@@ -159,6 +159,12 @@ Resources:
               'ecs:Submit*', 'ecr:GetAuthorizationToken', 'ecr:BatchGetImage', 'ecr:GetDownloadUrlForLayer',
               'logs:CreateLogStream', 'logs:PutLogEvents']
             Resource: '*'
+          - Effect: Allow
+            Action: ['kms:*']
+            Resource: '*'
+          - Effect: Allow
+            Action: ['dynamodb:*']
+            Resource: '*'
 
   ECSServiceRole:
     Type: AWS::IAM::Role
