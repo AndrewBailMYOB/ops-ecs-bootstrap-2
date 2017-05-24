@@ -5,7 +5,7 @@
   },
   {
     "ParameterKey": "EcsAMI",
-    "ParameterValue": "ami-fbe9eb98"
+    "ParameterValue": "ami-022b9262"
   },
   {
     "ParameterKey": "ASGMaxSize",
