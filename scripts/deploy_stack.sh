@@ -26,6 +26,8 @@ stack_tmpl="$2"
 stack_params="$3"
 poll_timeout=5
 
+#die "region=$AWS_DEFAULT_REGION stack_name=$1 stack_tmpl=$2 stack_params=$3"
+
 # NOTE: this isn't quite the same as AWS' check, but it's close
 [[ "$stack_name" =~ [^-a-zA-Z0-9] ]] && die "bad stack name"
 
@@ -97,7 +99,7 @@ stack_ctl() {
 }
 
 # validate the template first
-aws cloudformation validate-template --template-body file://"$stack_tmpl" >/dev/null 2>&1 || die "invalid template"
+aws cloudformation validate-template --template-body file://"$stack_tmpl" >/dev/null || die "invalid template"
 
 action="create-stack"
 while read -r; do
