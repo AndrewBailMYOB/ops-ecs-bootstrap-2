@@ -1,6 +1,6 @@
 Description: >
-  This template creates a VPC with a 3 subnet types
-  (public, app, and data) across 3 Availability Zones.
+  VPC with a 3 subnet types (public, app, and data)
+  across 3 Availability Zones.
 
 Parameters:
   VpcCIDR:
@@ -749,16 +749,24 @@ Outputs:
   VPC:
     Description: A reference to the created VPC
     Value: !Ref VPC
+    Export:
+        Name: service-stack-vpcid
 
   PublicSubnets:
     Description: A list of the public subnets
     Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2, !Ref PublicSubnet3 ]]
+    Export:
+        Name: service-stack-pub-subnetids
 
   AppSubnets:
     Description: A list of the app subnets
     Value: !Join [ ",", [ !Ref AppSubnet1, !Ref AppSubnet2, !Ref AppSubnet3 ]]
+    Export:
+        Name: service-stack-app-subnetids
 
   DataSubnets:
     Condition: CreateThreeTier
     Description: A list of the data subnets
     Value: !Join [ ",", [ !Ref DataSubnet1, !Ref DataSubnet2, !Ref DataSubnet3 ]]
+    Export:
+        Name: service-stack-data-subnetids
