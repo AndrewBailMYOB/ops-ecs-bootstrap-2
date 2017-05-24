@@ -26,8 +26,6 @@ stack_tmpl="$2"
 stack_params="$3"
 poll_timeout=5
 
-#die "region=$AWS_DEFAULT_REGION stack_name=$1 stack_tmpl=$2 stack_params=$3"
-
 # NOTE: this isn't quite the same as AWS' check, but it's close
 [[ "$stack_name" =~ [^-a-zA-Z0-9] ]] && die "bad stack name"
 
@@ -38,6 +36,8 @@ get_filesize() { wc -c <"$1"; }
 [[ $(get_filesize "$stack_tmpl") -gt "0" ]]     || die "template is zero bytes"
 [[ $(get_filesize "$stack_tmpl") -lt "51200" ]] || die "template is too big"
 [[ $(get_filesize "$stack_params") -gt "0" ]]   || die "params file is zero bytes"
+
+### die "region=$AWS_DEFAULT_REGION stack_name=$stack_name stack_tmpl=$2 stack_params=$3"
 
 # polls aws for stack status
 wait_completion() {
