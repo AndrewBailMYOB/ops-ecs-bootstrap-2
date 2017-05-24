@@ -34,6 +34,7 @@ test:
 delete-test:
 	export AWS_DEFAULT_REGION=$(T_REGION); \
 	aws ec2 delete-key-pair --key-name $(KEYNAME) && \
+	rm $(KEYNAME).pem && \
 	aws cloudformation delete-stack --stack-name $(STACKECS) && \
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKECS) && \
 	aws cloudformation delete-stack --stack-name $(STACKNET) && \
