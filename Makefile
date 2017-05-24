@@ -7,7 +7,7 @@ STACKECS := service-stack-ecs
 P_REGION := ap-southeast-2
 T_REGION := us-west-2
 
-.PHONY: help stack delete test test-delete
+.PHONY: help stack delete test delete-test
 
 stack:
 	@export AWS_DEFAULT_REGION=$(P_REGION); \
