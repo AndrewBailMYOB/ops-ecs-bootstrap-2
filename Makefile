@@ -1,17 +1,23 @@
-.DEFAULT_GOAL      := help
-SHELL              := /bin/bash
-STACK_NAME         ?= service-stack
-AWS_DEFAULT_REGION ?= ap-southeast-2
+.DEFAULT_GOAL := help
+SHELL         := /bin/bash
 
-.PHONY:	help stack delete test
+KEYNAME  := service-stack-key
+STACKNET := service-stack-net
+STACKECS := service-stack-ecs
+P_REGION := ap-southeast-2
+T_REGION := us-west-2
+
+.PHONY: help stack delete test test-delete
 
 stack:
-	@export AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION); \
-	./scripts/deploy_stack.sh $(STACK_NAME) network/template.yml network/params.json && \
-	./scripts/deploy_stack.sh $(STACK_NAME)-ecs ecs-cluster/template.yml ecs-cluster/params.json
+	@export AWS_DEFAULT_REGION=$(P_REGION); \
+	./scripts/create_keypair.sh $(KEYNAME) && \
+	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params.json && \
+	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params.json
+	@echo ":cloudformation: :trophy:"
 
 delete:
-	#aws cloudformation	delete-stack \
+	#aws cloudformation delete-stack \
 	#	--stack-name $(STACK_NAME)
 	#@echo "Waiting for stack deletion to complete ..."
 	#aws cloudformation wait stack-delete-complete --stack-name $(STACK_NAME)
@@ -19,29 +25,35 @@ delete:
 
 test:
 	shellcheck scripts/*.sh
+	export AWS_DEFAULT_REGION=$(T_REGION); \
+	./scripts/create_keypair.sh $(KEYNAME) && \
+	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params_test.json && \
+	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json
+	@echo ":cloudformation: :trophy:"
+
+delete-test:
+	export AWS_DEFAULT_REGION=$(T_REGION); \
+	aws ec2 delete-key-pair --key-name $(KEYNAME) && \
+	aws cloudformation delete-stack --stack-name $(STACKECS) && \
+	aws cloudformation wait stack-delete-complete --stack-name $(STACKECS) && \
+	aws cloudformation delete-stack --stack-name $(STACKNET) && \
+	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET)
 
 help:
-	@echo ""
-	@echo "-------------------------------------------------------"
-	@echo "Orlando's Amazing Stack Buildy Thing!"
-	@echo "-------------------------------------------------------"
-	@echo ""
-	@echo "To execute with the defaults: make stack"
-	@echo ""
-	@echo "The possible variables (default in parens) are:"
-	@echo "STACK_NAME (service-stack)"
-	@echo "AWS_DEFAULT_REGION (ap-southeast-2)"
-	@echo ""
-	@echo "The variables can be set as environment vars:"
-	@echo "STACK_NAME=mystack make stack"
-	@echo ""
-	@echo "The templates that will be submitted for execution are:"
-	@echo "network/template.yml"
-	@echo "ecs-cluster/template.yml"
-	@echo ""
-	@echo "In that order; there are output dependencies."
-	@echo "You can find the parameters in those directories."
-	@echo ""
-	@echo "Enjoy this fine aguardiente con moderación."
-	@echo "-------------------------------------------------------"
-	@echo ""
+	@echo ''
+	@echo '-------------------------------------------------------'
+	@echo 'Orlando's Amazing Stack Buildy Thing!'
+	@echo '-------------------------------------------------------'
+	@echo ''
+	@echo 'To execute against ap-southeast-2: make stack'
+	@echo ''
+	@echo 'The templates that will be submitted for execution are:'
+	@echo 'network/template.yml'
+	@echo 'ecs-cluster/template.yml'
+	@echo ''
+	@echo 'In that order; there are output dependencies.'
+	@echo 'You can find the parameters in those directories.'
+	@echo ''
+	@echo 'Enjoy this fine aguardiente con moderación.'
+	@echo '-------------------------------------------------------'
+	@echo ''
