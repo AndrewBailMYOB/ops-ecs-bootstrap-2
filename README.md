@@ -1,17 +1,42 @@
 # ops-cloudformation
-
-[![Build status](https://badge.buildkite.com/7842a01eaebc926427faf465582eb823d14f3a4b32245fc5c1.svg)](https://buildkite.com/myob/ops-cloudformation)
-
 A collection of AWS CloudFormation stacks to create resources on demand.
 
 
 ## Deploying a stack
-WIP
+A [makefile](Makefile) is provided which simplifies deployment. The makefile's
+*buildStack* target uses a [Bash script](scripts/deploy_stack.sh) to interact
+with `aws cli` to bring up or update a stack. Feedback is provided by the
+script to stdout. This script's output is unreliable for scraping.
 
+If a stack already exists (by name), the stack will be updated rather than
+created.
+
+
+## Examples
+
+### Get help:
+```bash
+make help
+```
+
+### Build out the default network stack:
+```bash
+make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json
+```
+
+### Optionally supply a region:
+```bash
+make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json DEFAULT_REGION=us-west-2
+```
+
+### Delete a stack:
+```bash
+make deleteStack STACK_NAME=foo DEFAULT_REGION=us-west-2
+```
 
 ## Bundled Stacks
-The following stacks are provided free of charge. Without warranty. Sort of.
+Some default stacks are provided; see the following for further information:
 
-* [Base network](templates/network/)
-* [ECR](templates/ecr/)
-* [ECS-Cluster](templates/ecs-cluster/)
+* [Base network](network/)
+* [ECR](ecr/)
+* [ECS-Cluster](ecs-cluster/)

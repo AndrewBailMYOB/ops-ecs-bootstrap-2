@@ -7,23 +7,14 @@ STACKECS := service-stack-ecs
 P_REGION := ap-southeast-2
 T_REGION := us-west-2
 
-.PHONY: help stack net-stack ecs-stack delete test delete-test
+.PHONY: help stack delete test delete-test
 
-stack: net-stack ecs-stack
-
-net-stack:
+stack:
 	@export AWS_DEFAULT_REGION=$(P_REGION); \
-	echo "--- :cloudformation: :checkered_flag: Building network stack"; \
-	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params.json && \
-	echo "--- :cloudformation: :hamburger: Network stack up!"
-
-ecs-stack:
-	@export AWS_DEFAULT_REGION=$(P_REGION); \
-	echo "--- :ec2: :key: Creating keypair"; \
 	./scripts/create_keypair.sh $(KEYNAME) && \
-	echo "--- :cloudformation: :checkered_flag: Building ECS cluster stack"; \
-	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params.json && \
-	echo "--- :cloudformation: :hamburger: ECS stack up!"
+	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params.json && \
+	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params.json
+	@echo ":cloudformation: :trophy:"
 
 delete:
 	#aws cloudformation delete-stack \

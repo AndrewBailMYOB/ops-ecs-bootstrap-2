@@ -1,20 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: ECS cluster.
+Description: ECS cluster; linked to service-stack-net.
 
 Parameters:
-  VpcId:
-    Type: String
-    Description: The VPC this cluster belongs to.
-  AppSubnetIds:
-    Type: CommaDelimitedList
-    Description: The subnet IDs of the application (private) layer.
-  EC2KeyName:
-    Type: String
-    Description: The name of the EC2 keypair to use on all instances.
   InstanceType:
     Type: String
     Description: The EC2 instance type to host Docker.
-    Default: t2.medium
+    Default: t2.xlarge
   EcsAMI:
     Type: String
     Description: ECS AMI to use for the launch config.
@@ -49,8 +40,8 @@ Resources:
           - Effect: Allow
             Action: ['ecs:DeregisterContainerInstance', 'ecs:DiscoverPollEndpoint',
               'ecs:Poll', 'ecs:RegisterContainerInstance', 'ecs:StartTelemetrySession',
-              'ecs:Submit*', 'ecr:GetAuthorizationToken', 'ecr:BatchGetImage',
-              'ecr:GetDownloadUrlForLayer', 'logs:CreateLogStream', 'logs:PutLogEvents']
+              'ecs:Submit*', 'ecr:GetAuthorizationToken', 'ecr:BatchGetImage', 'ecr:GetDownloadUrlForLayer',
+              'logs:CreateLogStream', 'logs:PutLogEvents']
             Resource: '*'
           - Effect: Allow
             Action: ['kms:*']
@@ -81,7 +72,7 @@ Resources:
       ImageId: !Ref EcsAMI
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref Ec2InstanceProfile
-      KeyName: !Ref EC2KeyName
+      KeyName: service-stack-key
       AssociatePublicIpAddress: True
       SecurityGroups:
       - !Ref SecurityGroup
@@ -110,7 +101,7 @@ Resources:
         MinInstancesInService: 1
     Properties:
       LaunchConfigurationName: !Ref LaunchConfiguration
-      VPCZoneIdentifier: !Ref AppSubnetIds
+      VPCZoneIdentifier: [!ImportValue service-stack-app-subnetids]
       MaxSize: !Ref ASGMaxSize
       MinSize: !Ref ASGMinSize
       DesiredCapacity: !Ref ASGDesiredSize
@@ -123,7 +114,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Permit traffic from ALB
-      VpcId: !Ref VpcId
+      VpcId: !ImportValue service-stack-vpcid
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 32768
@@ -134,7 +125,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Permit traffic to ALB
-      VpcId: !Ref VpcId
+      VpcId: !ImportValue service-stack-vpcid
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 80
@@ -145,7 +136,10 @@ Outputs:
   OpsECSCluster:
     Value: !Ref ECSCluster
     Description: "Outputs the name of the ECS cluster"
-
+    Export:
+      Name: ECSCluster
   OpsALBSecurityGroup:
     Value: !Ref ALBSecurityGroup
     Description: "Outputs the ID of the ALB security group"
+    Export:
+      Name: ECSALBSecurityGroup
