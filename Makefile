@@ -51,7 +51,7 @@ delete-test:
 help:
 	@echo ''
 	@echo '-------------------------------------------------------'
-	@echo 'Orlando's Amazing Stack Buildy Thing!'
+	@echo "Orlando's Amazing Stack Buildy Thing!"
 	@echo '-------------------------------------------------------'
 	@echo ''
 	@echo 'To execute against ap-southeast-2: make stack'
