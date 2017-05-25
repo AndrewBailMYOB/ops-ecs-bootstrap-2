@@ -1,20 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Provides shared ECS cluster to be used by a team.
+Description: ECS cluster; linked to service-stack-net.
 
 Parameters:
   InstanceType:
     Type: String
     Description: The EC2 instance type to host Docker.
     Default: t2.xlarge
-  SSHKeyName:
-    Type: AWS::EC2::KeyPair::KeyName
-    Description: For SSH Access
-  VpcId:
-    Type: String
-    Description: VPC ID to be used for security groups and ECS.
-  PrivateSubnets:
-    Type: List<AWS::EC2::Subnet::Id>
-    Description: List of private subnet IDs.
   EcsAMI:
     Type: String
     Description: ECS AMI to use for the launch config.
@@ -80,7 +71,7 @@ Resources:
       ImageId: !Ref EcsAMI
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref Ec2InstanceProfile
-      KeyName: !Ref SSHKeyName
+      KeyName: service-stack-key
       AssociatePublicIpAddress: True
       SecurityGroups:
       - !Ref SecurityGroup
@@ -108,7 +99,7 @@ Resources:
         MinInstancesInService: 0
     Properties:
       LaunchConfigurationName: !Ref LaunchConfiguration
-      VPCZoneIdentifier: !Ref PrivateSubnets
+      VPCZoneIdentifier: [!ImportValue service-stack-app-subnetids]
       MaxSize: !Ref ASGMaxSize
       MinSize: !Ref ASGMinSize
       DesiredCapacity: !Ref ASGDesiredSize
@@ -121,7 +112,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Permit traffic from ALB
-      VpcId: !Ref VpcId
+      VpcId: !ImportValue service-stack-vpcid
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 32768
@@ -132,7 +123,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Permit traffic to ALB
-      VpcId: !Ref VpcId
+      VpcId: !ImportValue service-stack-vpcid
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 80

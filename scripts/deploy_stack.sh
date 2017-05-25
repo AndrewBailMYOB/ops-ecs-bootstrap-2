@@ -37,6 +37,8 @@ get_filesize() { wc -c <"$1"; }
 [[ $(get_filesize "$stack_tmpl") -lt "51200" ]] || die "template is too big"
 [[ $(get_filesize "$stack_params") -gt "0" ]]   || die "params file is zero bytes"
 
+### die "region=$AWS_DEFAULT_REGION stack_name=$stack_name stack_tmpl=$2 stack_params=$3"
+
 # polls aws for stack status
 wait_completion() {
     local stack_name="$1"
@@ -97,7 +99,7 @@ stack_ctl() {
 }
 
 # validate the template first
-aws cloudformation validate-template --template-body file://"$stack_tmpl" >/dev/null 2>&1 || die "invalid template"
+aws cloudformation validate-template --template-body file://"$stack_tmpl" >/dev/null || die "invalid template"
 
 action="create-stack"
 while read -r; do
