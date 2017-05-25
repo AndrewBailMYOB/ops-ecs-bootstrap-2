@@ -3,10 +3,10 @@ A collection of AWS CloudFormation stacks to create resources on demand.
 
 
 ## Deploying a stack
-A [makefile](Makefile) is provided which simplifies deployment. The makefile's
-*buildStack* target uses a [Bash script](scripts/deploy_stack.sh) to interact
-with `aws cli` to bring up or update a stack. Feedback is provided by the
-script to stdout. This script's output is unreliable for scraping.
+The default action for the supplied `Makefile` is to provision a full network
+and ECS cluster stack.
+
+A script is provided for executing individual CloudFormation templates.
 
 If a stack already exists (by name), the stack will be updated rather than
 created.
@@ -14,25 +14,32 @@ created.
 
 ## Examples
 
-### Get help:
+### Get help
 ```bash
 make help
 ```
 
-### Build out the default network stack:
-```bash
-make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json
-```
 
-### Optionally supply a region:
+### Build out the default network stack
 ```bash
-make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json DEFAULT_REGION=us-west-2
+make stack
 ```
+This will build out a full network and ECS stack to `ap-southeast-2`.
 
-### Delete a stack:
+
+### Build out a test stack
 ```bash
-make deleteStack STACK_NAME=foo DEFAULT_REGION=us-west-2
+make test
 ```
+This will deploy full network and ECS stacks to `us-west-2`.
+
+
+### Deploy a template
+```bash
+./scripts/deploy_stack.sh [stackname] [template path] [param file path]
+```
+Deploy a single template to your current account and region.
+
 
 ## Bundled Stacks
 Some default stacks are provided; see the following for further information:
