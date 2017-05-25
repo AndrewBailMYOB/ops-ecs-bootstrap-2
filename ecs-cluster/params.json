@@ -4,19 +4,31 @@
     "ParameterValue": "t2.medium"
   },
   {
+    "ParameterKey": "SSHKeyName",
+    "ParameterValue": "oerazo"
+  },
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-c2148ba6"
+  },
+  {
+    "ParameterKey": "PrivateSubnets",
+    "ParameterValue": "subnet-32633956,subnet-691d541f,subnet-339d0d6a"
+  },
+  {
     "ParameterKey": "EcsAMI",
     "ParameterValue": "ami-fbe9eb98"
   },
   {
     "ParameterKey": "ASGMaxSize",
-    "ParameterValue": "2"
+    "ParameterValue": "10"
   },
   {
     "ParameterKey": "ASGMinSize",
-    "ParameterValue": "0"
+    "ParameterValue": "3"
   },
   {
     "ParameterKey": "ASGDesiredSize",
-    "ParameterValue": "1"
+    "ParameterValue": "3"
   }
 ]

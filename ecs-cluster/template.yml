@@ -12,15 +12,15 @@ Parameters:
   ASGMaxSize:
     Type: Number
     Description: Max allowed size for the AutoScaling group.
-    Default: 1
+    Default: 10
   ASGMinSize:
     Type: Number
     Description: Minimum allowed size for the AutoScaling group.
-    Default: 0
+    Default: 3
   ASGDesiredSize:
     Type: Number
     Description: Desired capacity for the AutoScaling group.
-    Default: 1
+    Default: 3
 
 Resources:
   EC2Role:
@@ -63,6 +63,7 @@ Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
+      LogGroupName: !Sub ${AWS::StackName}
       RetentionInDays: 30
 
   LaunchConfiguration:
@@ -80,6 +81,7 @@ Resources:
           #!/bin/bash
           yum update -y
           yum install -y aws-cli
+          yum install -y awslogs
           # set up the ECS config
           cat >> /etc/ecs/ecs.config <<EoConf
           ECS_CLUSTER=${ECSCluster}
@@ -96,7 +98,7 @@ Resources:
     UpdatePolicy:
       AutoScalingRollingUpdate:
         MaxBatchSize: 1
-        MinInstancesInService: 0
+        MinInstancesInService: 1
     Properties:
       LaunchConfigurationName: !Ref LaunchConfiguration
       VPCZoneIdentifier: [!ImportValue service-stack-app-subnetids]
