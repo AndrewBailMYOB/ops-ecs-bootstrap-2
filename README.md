@@ -1,4 +1,7 @@
 # ops-cloudformation
+
+[![Build status](https://badge.buildkite.com/7842a01eaebc926427faf465582eb823d14f3a4b32245fc5c1.svg)](https://buildkite.com/myob/ops-cloudformation)
+
 A collection of AWS CloudFormation stacks to create resources on demand.
 
 
