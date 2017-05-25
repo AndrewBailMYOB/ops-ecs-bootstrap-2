@@ -1,5 +1,17 @@
 [
   {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-3a42dc5e"
+  },
+  {
+    "ParameterKey": "AppSubnetIds",
+    "ParameterValue": "subnet-c83712ac,subnet-6cf4bd1a,subnet-a63eaeff"
+  },
+  {
+    "ParameterKey": "EC2KeyName",
+    "ParameterValue": "test-ecs-3"
+  },
+  {
     "ParameterKey": "InstanceType",
     "ParameterValue": "t2.medium"
   },
@@ -9,14 +21,14 @@
   },
   {
     "ParameterKey": "ASGMaxSize",
-    "ParameterValue": "2"
+    "ParameterValue": "10"
   },
   {
     "ParameterKey": "ASGMinSize",
-    "ParameterValue": "0"
+    "ParameterValue": "3"
   },
   {
     "ParameterKey": "ASGDesiredSize",
-    "ParameterValue": "1"
+    "ParameterValue": "3"
   }
 ]
