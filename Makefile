@@ -24,21 +24,29 @@ delete:
 	@echo 'not implemented :('
 
 test:
-	#shellcheck scripts/*.sh  # TODO add back in when Docker image is built
+	@echo "+++ :checkered_flag: Building test stack"
 	export AWS_DEFAULT_REGION=$(T_REGION); \
+	echo "+++ :key: Creating keypair"; \
 	./scripts/create_keypair.sh $(KEYNAME) && \
+	echo "+++ :cloudformation: Building network stack"; \
 	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params_test.json && \
-	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json
-	@echo ":cloudformation: :trophy:"
+	echo "+++ :cloudformation: Building ECS cluster stack"; \
+	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json; \
+	echo "+++ :trophy: Test stack built!"
 
 delete-test:
+	@echo "+++ :gun: Deleting test stack"; \
 	export AWS_DEFAULT_REGION=$(T_REGION); \
+	echo "+++ :key: Deleting keypair"; \
 	aws ec2 delete-key-pair --key-name $(KEYNAME) && \
-	rm $(KEYNAME).pem && \
+	rm -f $(KEYNAME).pem && \
+	echo "+++ :cloudformation: Deleting ECS cluster stack"; \
 	aws cloudformation delete-stack --stack-name $(STACKECS) && \
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKECS) && \
+	echo "+++ :cloudformation: Deleting network stack"; \
 	aws cloudformation delete-stack --stack-name $(STACKNET) && \
-	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET)
+	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET) && \
+	echo "+++ :trophy: Test stack deleted!"
 
 help:
 	@echo ''

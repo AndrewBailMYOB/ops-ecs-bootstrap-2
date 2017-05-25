@@ -1,12 +1,12 @@
 steps:
-  - label: Create temp network stack
+  - label: Create full stack in Oregon (us-west-2)
     command: make test
     agents:
       queue: central-dev
 
   - wait
 
-  - label: Delete temp network stack
+  - label: Delete full stack in Oregon (us-west-2)
     command: make delete-test
     agents:
       queue: central-dev
