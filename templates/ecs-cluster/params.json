@@ -1,5 +1,17 @@
 [
   {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-3a42dc5e"
+  },
+  {
+    "ParameterKey": "AppSubnetIds",
+    "ParameterValue": "subnet-c83712ac,subnet-6cf4bd1a,subnet-a63eaeff"
+  },
+  {
+    "ParameterKey": "EC2KeyName",
+    "ParameterValue": "test-ecs-3"
+  },
+  {
     "ParameterKey": "InstanceType",
     "ParameterValue": "t2.medium"
   },
