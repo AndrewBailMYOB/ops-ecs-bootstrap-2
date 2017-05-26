@@ -1,11 +1,11 @@
 .DEFAULT_GOAL := help
 SHELL         := /bin/bash
 
-KEYNAME  := service-stack-key
-STACKNET := service-stack-net
-STACKECS := service-stack-ecs
-P_REGION := ap-southeast-2
-T_REGION := us-west-2
+KEYNAME  := ops-ecs-key       # the name of the keypair
+STACKNET := ops-ecs-network   # the name of the network stack
+STACKECS := ops-ecs-cluster   # the name of the ecs cluster stack
+P_REGION := ap-southeast-2    # production region
+T_REGION := us-west-2         # test region
 
 .PHONY: help stack delete test delete-test
 
