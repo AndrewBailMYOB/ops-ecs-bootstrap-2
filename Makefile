@@ -13,8 +13,8 @@ stack:
 	@export AWS_DEFAULT_REGION=$(P_REGION); \
 	./scripts/create_keypair.sh $(KEYNAME) && \
 	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params.json && \
-	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params.json
-	@echo ":cloudformation: :trophy:"
+	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params.json && \
+	echo ":cloudformation: :trophy:"
 
 delete:
 	#aws cloudformation delete-stack \
@@ -23,15 +23,15 @@ delete:
 	#aws cloudformation wait stack-delete-complete --stack-name $(STACK_NAME)
 	@echo 'not implemented :('
 
-test:
+test: test-scripts
 	@echo "--- :checkered_flag: Building test stack"
 	export AWS_DEFAULT_REGION=$(T_REGION); \
 	echo "--- :key: Creating keypair"; \
 	./scripts/create_keypair.sh $(KEYNAME) && \
-	echo "--- :cloudformation: Building network stack"; \
+	echo "--- :cloudformation: Building network stack" &&  \
 	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params_test.json && \
-	echo "--- :cloudformation: Building ECS cluster stack"; \
-	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json; \
+	echo "--- :cloudformation: Building ECS cluster stack" &&  \
+	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
 	echo "--- :trophy: Test stack built!"
 
 delete-test:
@@ -40,13 +40,17 @@ delete-test:
 	echo "--- :key: Deleting keypair"; \
 	aws ec2 delete-key-pair --key-name $(KEYNAME) && \
 	rm -f $(KEYNAME).pem && \
-	echo "--- :cloudformation: Deleting ECS cluster stack"; \
+	echo "--- :cloudformation: Deleting ECS cluster stack" && \
 	aws cloudformation delete-stack --stack-name $(STACKECS) && \
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKECS) && \
-	echo "--- :cloudformation: Deleting network stack"; \
+	echo "--- :cloudformation: Deleting network stack" && \
 	aws cloudformation delete-stack --stack-name $(STACKNET) && \
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET) && \
 	echo "--- :trophy: Test stack deleted!"
+
+test-scripts:
+	@echo '--- :bash: Testing scripts'
+	docker run -v "$(PWD):/mnt" koalaman/shellcheck scripts/*.sh
 
 help:
 	@echo ''
