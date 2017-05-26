@@ -79,7 +79,7 @@ Resources:
           Action:
             - "sts:AssumeRole"
       Path: "/"
-      RoleName: !Sub "${AWS::StackName}-vpc-flow-log"
+      RoleName: !Sub "${AWS::StackName}-${AWS::Region}-vpc-flow-log"
 
   FlowLogPolicy:
     Type: AWS::IAM::Policy
@@ -750,23 +750,23 @@ Outputs:
     Description: A reference to the created VPC
     Value: !Ref VPC
     Export:
-        Name: service-stack-vpcid
+        Name: ops-ecs-vpcid
 
   PublicSubnets:
     Description: A list of the public subnets
     Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2, !Ref PublicSubnet3 ]]
     Export:
-        Name: service-stack-pub-subnetids
+        Name: ops-ecs-pub-subnetids
 
   AppSubnets:
     Description: A list of the app subnets
     Value: !Join [ ",", [ !Ref AppSubnet1, !Ref AppSubnet2, !Ref AppSubnet3 ]]
     Export:
-        Name: service-stack-app-subnetids
+        Name: ops-ecs-app-subnetids
 
   DataSubnets:
     Condition: CreateThreeTier
     Description: A list of the data subnets
     Value: !Join [ ",", [ !Ref DataSubnet1, !Ref DataSubnet2, !Ref DataSubnet3 ]]
     Export:
-        Name: service-stack-data-subnetids
+        Name: ops-ecs-data-subnetids

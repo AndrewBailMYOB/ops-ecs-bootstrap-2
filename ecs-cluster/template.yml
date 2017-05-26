@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: ECS cluster; linked to service-stack-net.
+Description: ECS cluster; linked to ops-ecs-network.
 
 Parameters:
   InstanceType:
@@ -72,7 +72,7 @@ Resources:
       ImageId: !Ref EcsAMI
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref Ec2InstanceProfile
-      KeyName: service-stack-key
+      KeyName: ops-ecs-key
       AssociatePublicIpAddress: True
       SecurityGroups:
       - !Ref SecurityGroup
@@ -101,7 +101,7 @@ Resources:
         MinInstancesInService: 1
     Properties:
       LaunchConfigurationName: !Ref LaunchConfiguration
-      VPCZoneIdentifier: [!ImportValue service-stack-app-subnetids]
+      VPCZoneIdentifier: [!ImportValue ops-ecs-app-subnetids]
       MaxSize: !Ref ASGMaxSize
       MinSize: !Ref ASGMinSize
       DesiredCapacity: !Ref ASGDesiredSize
@@ -114,7 +114,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Permit traffic from ALB
-      VpcId: !ImportValue service-stack-vpcid
+      VpcId: !ImportValue ops-ecs-vpcid
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 32768
@@ -125,7 +125,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Permit traffic to ALB
-      VpcId: !ImportValue service-stack-vpcid
+      VpcId: !ImportValue ops-ecs-vpcid
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 80
@@ -137,9 +137,9 @@ Outputs:
     Value: !Ref ECSCluster
     Description: "Outputs the name of the ECS cluster"
     Export:
-      Name: ECSCluster
+      Name: ops-ecs-clusterid
   OpsALBSecurityGroup:
     Value: !Ref ALBSecurityGroup
     Description: "Outputs the ID of the ALB security group"
     Export:
-      Name: ECSALBSecurityGroup
+      Name: ops-ecs-albsgid

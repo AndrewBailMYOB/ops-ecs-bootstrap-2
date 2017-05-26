@@ -1,11 +1,11 @@
 .DEFAULT_GOAL := help
 SHELL         := /bin/bash
 
-KEYNAME  := service-stack-key
-STACKNET := service-stack-net
-STACKECS := service-stack-ecs
-P_REGION := ap-southeast-2
-T_REGION := us-west-2
+KEYNAME  := ops-ecs-key       # the name of the keypair
+STACKNET := ops-ecs-network   # the name of the network stack
+STACKECS := ops-ecs-cluster   # the name of the ecs cluster stack
+P_REGION := ap-southeast-2    # production region
+T_REGION := us-west-2         # test region
 
 .PHONY: help stack delete test delete-test
 
@@ -51,7 +51,7 @@ delete-test:
 help:
 	@echo ''
 	@echo '-------------------------------------------------------'
-	@echo 'Orlando's Amazing Stack Buildy Thing!'
+	@echo "Orlando's Amazing Stack Buildy Thing!"
 	@echo '-------------------------------------------------------'
 	@echo ''
 	@echo 'To execute against ap-southeast-2: make stack'
@@ -62,6 +62,10 @@ help:
 	@echo ''
 	@echo 'In that order; there are output dependencies.'
 	@echo 'You can find the parameters in those directories.'
+	@echo ''
+	@echo 'To test the stack, execute: make test'
+	@echo 'This will build out a test stack in $(T_REGION).'
+	@echo 'To tear-down the test stack: make delete-test'
 	@echo ''
 	@echo 'Enjoy this fine aguardiente con moderación.'
 	@echo '-------------------------------------------------------'
