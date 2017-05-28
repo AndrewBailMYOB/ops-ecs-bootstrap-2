@@ -58,7 +58,7 @@ the existence of an SSH keypair is checked for. The keypair name is:
 ops-ecs-key
 ```
 
-Stacks are deployed to AWS using a script: (create-stack.sh)[scripts/create-stack.sh].
+Stacks are deployed to AWS using a script: [create-stack.sh](scripts/create-stack.sh).
 
 
 ## EC2 SSH Keypair
@@ -66,7 +66,7 @@ If this key does not exist in the account for the region, it will be created
 and the private key material is emitted to a local `pem` file. Ensure this
 material is captured, saved, and the original file removed securely.
 
-The script which creates the keypair is (create-keypair.sh)[scripts/create-keypair.sh].
+The script which creates the keypair is [create-keypair.sh](scripts/create-keypair.sh).
 
 
 ### Deployment examples:
