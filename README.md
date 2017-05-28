@@ -1,42 +1,92 @@
-# ops-cloudformation
-A collection of AWS CloudFormation stacks to create resources on demand.
+# PE Container Run-time Foundation (ECS)
+
+This repository contains a number of CloudFormation templates and helper
+scripts designed to create foundation stacks for running Docker containers
+in AWS ECS.
 
 
-## Deploying a stack
-A [makefile](Makefile) is provided which simplifies deployment. The makefile's
-*buildStack* target uses a [Bash script](scripts/deploy_stack.sh) to interact
-with `aws cli` to bring up or update a stack. Feedback is provided by the
-script to stdout. This script's output is unreliable for scraping.
+## Infrastructure Deployed
 
-If a stack already exists (by name), the stack will be updated rather than
-created.
+The templates deploy the following infrastructure:
 
 
-## Examples
+### VPC
 
-### Get help:
-```bash
+One VPC with three subnets across three availability zones.
+
+By default, the VPC encompasses `192.168.0.0/16` and 3 *tiered* subnets.
+Each subnet is set to `/20` and each tier is addressable as `/18`.
+
+
+```
+                     +--------------------+--------------------+--------------------+
+    TIER MASK        |        AZ1         |        AZ2         |       AZ3          |       SPARE
+---------------------------------------------------------------------------------------------------------
+                     | +----------------+ | +----------------+ | +----------------+ |
+  192.168.0.0/18     | |192.168.0.0/20  | | |192.168.16.0/20 | | |192.168.32.0/20 | |  192.168.48.0/20
+                     | +----------------+ | +----------------+ | +----------------+ |
+                     |                    |                    |                    |
+                     | +----------------+ | +----------------+ | +----------------+ |
+ 192.168.64.0/18     | |192.168.64.0/20 | | |192.168.80.0/20 | | |192.168.96.0/20 | |  192.168.112.0/20
+                     | +----------------+ | +----------------+ | +----------------+ |
+                     |                    |                    |                    |
+                     | +----------------+ | +----------------+ | +----------------+ |
+192.168.128.0/18     | |192.168.128.0/20| | |192.168.144.0/20| | |192.168.160.0/20| |  192.168.176.0/20
+                     | +----------------+ | +----------------+ | +----------------+ |
+                     |                    |                    |                    |
+                     +--------------------+--------------------+--------------------+
+```
+
+
+### ECS Cluster
+
+An ECS cluster which defines default values for:
+
+* the instance type for the Docker hosts
+* the AMI for the Docker hosts
+* the Auto-scaling Group
+
+A default role for the `ec2` instances is defined and provided with a basic
+policy for accessing internal resources.
+
+
+## Deploying the Stacks
+
+A [makefile](Makefile) is provided which simplifies deployment. Prior to deployment,
+the existence of an SSH keypair is checked for. The keypair name is:
+```
+ops-ecs-key
+```
+
+Stacks are deployed to AWS using a script: (create-stack.sh)[scripts/create-stack.sh].
+
+
+## EC2 SSH Keypair
+If this key does not exist in the account for the region, it will be created
+and the private key material is emitted to a local `pem` file. Ensure this
+material is captured, saved, and the original file removed securely.
+
+The script which creates the keypair is (create-keypair.sh)[scripts/create-keypair.sh].
+
+
+### Deployment examples:
+
+#### get help
+```
 make help
 ```
 
-### Build out the default network stack:
-```bash
-make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json
+#### testing the stacks
+```
+make test
+```
+The test stacks will be built into the `us-west-2` region. Once verified,
+delete the test stacks:
+```
+make delete-test
 ```
 
-### Optionally supply a region:
-```bash
-make buildStack STACK_NAME=foo CFN_LOCATION=network/template.yml CFN_PARAMS=network/params.json DEFAULT_REGION=us-west-2
+#### deploy production stacks
 ```
-
-### Delete a stack:
-```bash
-make deleteStack STACK_NAME=foo DEFAULT_REGION=us-west-2
+make stack
 ```
-
-## Bundled Stacks
-Some default stacks are provided; see the following for further information:
-
-* [Base network](network/)
-* [ECR](ecr/)
-* [ECS-Cluster](ecs-cluster/)
