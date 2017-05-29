@@ -7,25 +7,36 @@ STACKECS := ops-ecs-cluster
 P_REGION := ap-southeast-2
 T_REGION := us-west-2
 
-.PHONY: help stack delete test delete-test
+.PHONY: help stack delete test delete-test test-scripts
 
 stack:
-	@export AWS_DEFAULT_REGION=$(P_REGION); \
+	@echo "--- :checkered_flag: Building stack"; \
+	export AWS_DEFAULT_REGION=$(P_REGION) && \
+	echo "--- :key: Creating keypair" && \
 	./scripts/create-keypair.sh $(KEYNAME) && \
-	./scripts/create-stack.sh $(STACKNET) network/template.yml network/params.json && \
-	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params.json
-	@echo ":cloudformation: :trophy:"
+	echo "--- :cloudformation: Building network stack" && \
+	./scripts/create-stack.sh $(STACKNET) network/template.yml network/params_test.json && \
+	echo "--- :cloudformation: Building ECS cluster stack" && \
+	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
+	echo "--- :trophy: Stack built!"
 
 delete:
-	#aws cloudformation delete-stack \
-	#	--stack-name $(STACK_NAME)
-	#@echo "Waiting for stack deletion to complete ..."
-	#aws cloudformation wait stack-delete-complete --stack-name $(STACK_NAME)
-	@echo 'not implemented :('
+	@echo "--- :gun: Deleting stack"; \
+	export AWS_DEFAULT_REGION=$(P_REGION) && \
+	echo "--- :key: Deleting keypair" && \
+	aws ec2 delete-key-pair --key-name $(KEYNAME) && \
+	rm -f $(KEYNAME).pem && \
+	echo "--- :cloudformation: Deleting ECS cluster stack" && \
+	aws cloudformation delete-stack --stack-name $(STACKECS) && \
+	aws cloudformation wait stack-delete-complete --stack-name $(STACKECS) && \
+	echo "--- :cloudformation: Deleting network stack" && \
+	aws cloudformation delete-stack --stack-name $(STACKNET) && \
+	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET) && \
+	echo "--- :trophy: Stack deleted!"
 
 test: test-scripts
-	@echo "--- :checkered_flag: Building test stack"
-	export AWS_DEFAULT_REGION=$(T_REGION); \
+	@echo "--- :checkered_flag: Building test stack"; \
+	export AWS_DEFAULT_REGION=$(T_REGION) && \
 	echo "--- :key: Creating keypair" && \
 	./scripts/create-keypair.sh $(KEYNAME) && \
 	echo "--- :cloudformation: Building network stack" && \
@@ -34,9 +45,13 @@ test: test-scripts
 	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
 	echo "--- :trophy: Test stack built!"
 
+test-scripts:
+	@echo '--- :bash: Testing scripts'
+	docker run -v "$(PWD):/mnt" koalaman/shellcheck scripts/*.sh
+
 delete-test:
 	@echo "--- :gun: Deleting test stack"; \
-	export AWS_DEFAULT_REGION=$(T_REGION); \
+	export AWS_DEFAULT_REGION=$(T_REGION) && \
 	echo "--- :key: Deleting keypair" && \
 	aws ec2 delete-key-pair --key-name $(KEYNAME) && \
 	rm -f $(KEYNAME).pem && \
