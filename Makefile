@@ -13,11 +13,11 @@ stack:
 	@echo "--- :checkered_flag: Building stack"; \
 	export AWS_DEFAULT_REGION=$(P_REGION) && \
 	echo "--- :key: Creating keypair" && \
-	./scripts/create_keypair.sh $(KEYNAME) && \
+	./scripts/create-keypair.sh $(KEYNAME) && \
 	echo "--- :cloudformation: Building network stack" && \
-	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params_test.json && \
+	./scripts/create-stack.sh $(STACKNET) network/template.yml network/params_test.json && \
 	echo "--- :cloudformation: Building ECS cluster stack" && \
-	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
+	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
 	echo "--- :trophy: Stack built!"
 
 delete:
@@ -38,11 +38,11 @@ test: test-scripts
 	@echo "--- :checkered_flag: Building test stack"; \
 	export AWS_DEFAULT_REGION=$(T_REGION) && \
 	echo "--- :key: Creating keypair" && \
-	./scripts/create_keypair.sh $(KEYNAME) && \
+	./scripts/create-keypair.sh $(KEYNAME) && \
 	echo "--- :cloudformation: Building network stack" && \
-	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params_test.json && \
+	./scripts/create-stack.sh $(STACKNET) network/template.yml network/params_test.json && \
 	echo "--- :cloudformation: Building ECS cluster stack" && \
-	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
+	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
 	echo "--- :trophy: Test stack built!"
 
 test-scripts:
