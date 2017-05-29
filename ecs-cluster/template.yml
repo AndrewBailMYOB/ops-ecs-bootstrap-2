@@ -63,7 +63,7 @@ Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub ${AWS::StackName}
+      LogGroupName: !Sub "${AWS::StackName}-${AWS::Region}-log-group"
       RetentionInDays: 30
 
   LaunchConfiguration:
@@ -131,6 +131,54 @@ Resources:
         FromPort: 80
         ToPort: 80
         CidrIp: 0.0.0.0/0
+
+  CPUUtilizationScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      Cooldown: '300'
+      ScalingAdjustment: '1'
+  
+  CPUUtilizationScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      Cooldown: '300'
+      ScalingAdjustment: '-1'
+
+  CPUUtilizationHighAlert:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: '1'
+      Statistic: Maximum
+      Threshold: '80'
+      Period: '60'
+      AlarmActions:
+      - !Ref CPUUtilizationScaleUpPolicy
+      Dimensions:
+      - Name: ClusterName
+        Value: !Ref ECSCluster
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+
+  CPUUtilizationNormalAlert:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: '1'
+      Statistic: Maximum
+      Threshold: '40'
+      Period: '60'
+      AlarmActions:
+      - !Ref CPUUtilizationScaleDownPolicy
+      Dimensions:
+      - Name: ClusterName
+        Value: !Ref ECSCluster
+      ComparisonOperator: LessThanThreshold
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
 
 Outputs:
   OpsECSCluster:

@@ -63,6 +63,10 @@ delete-test:
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET) && \
 	echo "--- :trophy: Test stack deleted!"
 
+test-scripts:
+	@echo '--- :bash: Testing scripts'
+	docker run -v "$(PWD):/mnt" koalaman/shellcheck scripts/*.sh
+
 help:
 	@echo ''
 	@echo '-------------------------------------------------------'
