@@ -15,9 +15,9 @@ stack:
 	echo "--- :key: Creating keypair" && \
 	./scripts/create-keypair.sh $(KEYNAME) && \
 	echo "--- :cloudformation: Building network stack" && \
-	./scripts/create-stack.sh $(STACKNET) network/template.yml network/params_test.json && \
+	./scripts/create-stack.sh $(STACKNET) network/template.yml network/params.json && \
 	echo "--- :cloudformation: Building ECS cluster stack" && \
-	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
+	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params.json && \
 	echo "--- :trophy: Stack built!"
 
 delete:
