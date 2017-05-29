@@ -26,18 +26,18 @@ delete:
 test: test-scripts
 	@echo "--- :checkered_flag: Building test stack"
 	export AWS_DEFAULT_REGION=$(T_REGION); \
-	echo "--- :key: Creating keypair"; \
+	echo "--- :key: Creating keypair" && \
 	./scripts/create-keypair.sh $(KEYNAME) && \
-	echo "--- :cloudformation: Building network stack"; \
+	echo "--- :cloudformation: Building network stack" && \
 	./scripts/create-stack.sh $(STACKNET) network/template.yml network/params_test.json && \
-	echo "--- :cloudformation: Building ECS cluster stack"; \
-	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json; \
+	echo "--- :cloudformation: Building ECS cluster stack" && \
+	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
 	echo "--- :trophy: Test stack built!"
 
 delete-test:
 	@echo "--- :gun: Deleting test stack"; \
 	export AWS_DEFAULT_REGION=$(T_REGION); \
-	echo "--- :key: Deleting keypair"; \
+	echo "--- :key: Deleting keypair" && \
 	aws ec2 delete-key-pair --key-name $(KEYNAME) && \
 	rm -f $(KEYNAME).pem && \
 	echo "--- :cloudformation: Deleting ECS cluster stack" && \
