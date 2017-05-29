@@ -1,13 +1,13 @@
 .DEFAULT_GOAL := help
 SHELL         := /bin/bash
 
-KEYNAME  := ops-ecs-key       # the name of the keypair
-STACKNET := ops-ecs-network   # the name of the network stack
-STACKECS := ops-ecs-cluster   # the name of the ecs cluster stack
-P_REGION := ap-southeast-2    # production region
-T_REGION := us-west-2         # test region
+KEYNAME  := ops-ecs-key
+STACKNET := ops-ecs-network
+STACKECS := ops-ecs-cluster
+P_REGION := ap-southeast-2
+T_REGION := us-west-2
 
-.PHONY: help stack delete test delete-test
+.PHONY: help stack delete test delete-test test-scripts
 
 stack:
 	@echo "--- :checkered_flag: Building stack"; \
@@ -34,7 +34,7 @@ delete:
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET) && \
 	echo "--- :trophy: Stack deleted!"
 
-test:
+test: test-scripts
 	@echo "--- :checkered_flag: Building test stack"; \
 	export AWS_DEFAULT_REGION=$(T_REGION) && \
 	echo "--- :key: Creating keypair" && \
@@ -44,6 +44,10 @@ test:
 	echo "--- :cloudformation: Building ECS cluster stack" && \
 	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
 	echo "--- :trophy: Test stack built!"
+
+test-scripts:
+	@echo '--- :bash: Testing scripts'
+	docker run -v "$(PWD):/mnt" koalaman/shellcheck scripts/*.sh
 
 delete-test:
 	@echo "--- :gun: Deleting test stack"; \
