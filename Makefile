@@ -10,40 +10,51 @@ T_REGION := us-west-2         # test region
 .PHONY: help stack delete test delete-test
 
 stack:
-	@export AWS_DEFAULT_REGION=$(P_REGION); \
+	@echo "--- :checkered_flag: Building stack"; \
+	export AWS_DEFAULT_REGION=$(P_REGION) && \
+	echo "--- :key: Creating keypair" && \
 	./scripts/create_keypair.sh $(KEYNAME) && \
-	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params.json && \
-	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params.json
-	@echo ":cloudformation: :trophy:"
+	echo "--- :cloudformation: Building network stack" && \
+	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params_test.json && \
+	echo "--- :cloudformation: Building ECS cluster stack" && \
+	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
+	echo "--- :trophy: Stack built!"
 
 delete:
-	#aws cloudformation delete-stack \
-	#	--stack-name $(STACK_NAME)
-	#@echo "Waiting for stack deletion to complete ..."
-	#aws cloudformation wait stack-delete-complete --stack-name $(STACK_NAME)
-	@echo 'not implemented :('
+	@echo "--- :gun: Deleting stack"; \
+	export AWS_DEFAULT_REGION=$(P_REGION) && \
+	echo "--- :key: Deleting keypair" && \
+	aws ec2 delete-key-pair --key-name $(KEYNAME) && \
+	rm -f $(KEYNAME).pem && \
+	echo "--- :cloudformation: Deleting ECS cluster stack" && \
+	aws cloudformation delete-stack --stack-name $(STACKECS) && \
+	aws cloudformation wait stack-delete-complete --stack-name $(STACKECS) && \
+	echo "--- :cloudformation: Deleting network stack" && \
+	aws cloudformation delete-stack --stack-name $(STACKNET) && \
+	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET) && \
+	echo "--- :trophy: Stack deleted!"
 
 test:
-	@echo "--- :checkered_flag: Building test stack"
-	export AWS_DEFAULT_REGION=$(T_REGION); \
-	echo "--- :key: Creating keypair"; \
+	@echo "--- :checkered_flag: Building test stack"; \
+	export AWS_DEFAULT_REGION=$(T_REGION) && \
+	echo "--- :key: Creating keypair" && \
 	./scripts/create_keypair.sh $(KEYNAME) && \
-	echo "--- :cloudformation: Building network stack"; \
+	echo "--- :cloudformation: Building network stack" && \
 	./scripts/deploy_stack.sh $(STACKNET) network/template.yml network/params_test.json && \
-	echo "--- :cloudformation: Building ECS cluster stack"; \
-	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json; \
+	echo "--- :cloudformation: Building ECS cluster stack" && \
+	./scripts/deploy_stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
 	echo "--- :trophy: Test stack built!"
 
 delete-test:
 	@echo "--- :gun: Deleting test stack"; \
-	export AWS_DEFAULT_REGION=$(T_REGION); \
-	echo "--- :key: Deleting keypair"; \
+	export AWS_DEFAULT_REGION=$(T_REGION) && \
+	echo "--- :key: Deleting keypair" && \
 	aws ec2 delete-key-pair --key-name $(KEYNAME) && \
 	rm -f $(KEYNAME).pem && \
-	echo "--- :cloudformation: Deleting ECS cluster stack"; \
+	echo "--- :cloudformation: Deleting ECS cluster stack" && \
 	aws cloudformation delete-stack --stack-name $(STACKECS) && \
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKECS) && \
-	echo "--- :cloudformation: Deleting network stack"; \
+	echo "--- :cloudformation: Deleting network stack" && \
 	aws cloudformation delete-stack --stack-name $(STACKNET) && \
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET) && \
 	echo "--- :trophy: Test stack deleted!"
