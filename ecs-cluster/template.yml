@@ -131,6 +131,10 @@ Resources:
         FromPort: 80
         ToPort: 80
         CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
 
   CPUUtilizationScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
@@ -139,7 +143,7 @@ Resources:
       AutoScalingGroupName: !Ref AutoScalingGroup
       Cooldown: '300'
       ScalingAdjustment: '1'
-  
+
   CPUUtilizationScaleDownPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
