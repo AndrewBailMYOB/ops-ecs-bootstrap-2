@@ -1,11 +1,11 @@
 .DEFAULT_GOAL := help
 SHELL         := /bin/bash
 
-KEYNAME  := ops-ecs-key       # the name of the keypair
-STACKNET := ops-ecs-network   # the name of the network stack
-STACKECS := ops-ecs-cluster   # the name of the ecs cluster stack
-P_REGION := ap-southeast-2    # production region
-T_REGION := us-west-2         # test region
+KEYNAME  := ops-ecs-key
+STACKNET := ops-ecs-network
+STACKECS := ops-ecs-cluster
+P_REGION := ap-southeast-2
+T_REGION := us-west-2
 
 .PHONY: help stack delete test delete-test
 
@@ -23,30 +23,34 @@ delete:
 	#aws cloudformation wait stack-delete-complete --stack-name $(STACK_NAME)
 	@echo 'not implemented :('
 
-test:
+test: test-scripts
 	@echo "--- :checkered_flag: Building test stack"
 	export AWS_DEFAULT_REGION=$(T_REGION); \
-	echo "--- :key: Creating keypair"; \
+	echo "--- :key: Creating keypair" && \
 	./scripts/create-keypair.sh $(KEYNAME) && \
-	echo "--- :cloudformation: Building network stack"; \
+	echo "--- :cloudformation: Building network stack" && \
 	./scripts/create-stack.sh $(STACKNET) network/template.yml network/params_test.json && \
-	echo "--- :cloudformation: Building ECS cluster stack"; \
-	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json; \
+	echo "--- :cloudformation: Building ECS cluster stack" && \
+	./scripts/create-stack.sh $(STACKECS) ecs-cluster/template.yml ecs-cluster/params_test.json && \
 	echo "--- :trophy: Test stack built!"
 
 delete-test:
 	@echo "--- :gun: Deleting test stack"; \
 	export AWS_DEFAULT_REGION=$(T_REGION); \
-	echo "--- :key: Deleting keypair"; \
+	echo "--- :key: Deleting keypair" && \
 	aws ec2 delete-key-pair --key-name $(KEYNAME) && \
 	rm -f $(KEYNAME).pem && \
-	echo "--- :cloudformation: Deleting ECS cluster stack"; \
+	echo "--- :cloudformation: Deleting ECS cluster stack" && \
 	aws cloudformation delete-stack --stack-name $(STACKECS) && \
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKECS) && \
-	echo "--- :cloudformation: Deleting network stack"; \
+	echo "--- :cloudformation: Deleting network stack" && \
 	aws cloudformation delete-stack --stack-name $(STACKNET) && \
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET) && \
 	echo "--- :trophy: Test stack deleted!"
+
+test-scripts:
+	@echo '--- :bash: Testing scripts'
+	docker run -v "$(PWD):/mnt" koalaman/shellcheck scripts/*.sh
 
 help:
 	@echo ''

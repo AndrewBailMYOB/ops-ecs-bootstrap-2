@@ -63,7 +63,7 @@ Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub ${AWS::StackName}
+      LogGroupName: !Sub "${AWS::StackName}-${AWS::Region}-log-group"
       RetentionInDays: 30
 
   LaunchConfiguration:

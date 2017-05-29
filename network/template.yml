@@ -103,7 +103,7 @@ Resources:
   CloudWatchLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "${AWS::StackName}-flow-logs"
+      LogGroupName: !Sub "${AWS::StackName}-${AWS::Region}-log-group"
       RetentionInDays: !Ref VpcFlowLogRetention
 
   MainFlowLog:
