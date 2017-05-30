@@ -63,17 +63,13 @@ delete-test:
 	aws cloudformation wait stack-delete-complete --stack-name $(STACKNET) && \
 	echo "--- :trophy: Test stack deleted!"
 
-test-scripts:
-	@echo '--- :bash: Testing scripts'
-	docker run -v "$(PWD):/mnt" koalaman/shellcheck scripts/*.sh
-
 help:
 	@echo ''
 	@echo '-------------------------------------------------------'
 	@echo "Orlando's Amazing Stack Buildy Thing!"
 	@echo '-------------------------------------------------------'
 	@echo ''
-	@echo 'To execute against ap-southeast-2: make stack'
+	@echo 'To execute against $(P_REGION): make stack'
 	@echo ''
 	@echo 'The templates that will be submitted for execution are:'
 	@echo 'network/template.yml'
