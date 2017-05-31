@@ -5,6 +5,16 @@ scripts designed to create foundation stacks for running Docker containers
 in AWS ECS.
 
 
+## Environments
+
+The two environments (test and production) are separated by region;
+production stacks are deployed to `ap-southeast-2`; test stacks are executed
+in `us-west-2`. This is because the names and exports of the stacks are fixed.
+
+There are certain resources which span regions, such as `IAM` roles - these
+resources are named such that the region is included.
+
+
 ## Infrastructure Deployed
 
 The templates deploy the following infrastructure:
@@ -37,6 +47,9 @@ Each subnet is set to `/20` and each tier is addressable as `/18`.
                      +--------------------+--------------------+--------------------+
 ```
 
+The observant reader will note that there is also a spare tier which could
+be provisioned for secure assets or the like.
+
 
 ### ECS Cluster
 
@@ -53,12 +66,21 @@ policy for accessing internal resources.
 ## Deploying the Stacks
 
 A [makefile](Makefile) is provided which simplifies deployment. Prior to deployment,
-the existence of an SSH keypair is checked for. The keypair name is:
-```
-ops-ecs-key
-```
+the existence of an SSH keypair is checked for. The keypair name is: `ops-ecs-key`.
 
 Stacks are deployed to AWS using a script: [create-stack.sh](scripts/create-stack.sh).
+
+The script accepts the following:
+
+* stack name
+* template path
+* parameter file path
+
+The provided makefile sets some default values and then calls the script in order
+to deploy the follwing stacks:
+
+* network (ops-ecs-network)
+* ECS cluster (ops-ecs-cluster)
 
 
 ## EC2 SSH Keypair
@@ -86,7 +108,16 @@ delete the test stacks:
 make delete-test
 ```
 
+There is a step in the makefile which performs a static code analysis of
+any shell scripts located in the `scripts` directory. The remainder of
+the testing is *smoke* or *pre-flight* style testing as the stacks will be
+brought up in a live, production-like environment.
+
 #### deploy production stacks
 ```
 make stack
 ```
+
+Once executed, the stacks are deployed to the production region. Once again,
+ensure that the key material (`ops-ecs-key.pem`) is saved to an appropriate
+location.
