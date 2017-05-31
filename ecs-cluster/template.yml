@@ -136,38 +136,21 @@ Resources:
         ToPort: 443
         CidrIp: 0.0.0.0/0
 
-  CPUReservationScaleUpPolicy:
-    Type: AWS::AutoScaling::ScalingPolicy
-    Properties:
-      AdjustmentType: ChangeInCapacity
-      AutoScalingGroupName: !Ref AutoScalingGroup
-      Cooldown: '300'
-      ScalingAdjustment: '1'
-
   MemoryReservationScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
       AdjustmentType: ChangeInCapacity
       AutoScalingGroupName: !Ref AutoScalingGroup
-      Cooldown: '300'
-      ScalingAdjustment: '1'
-
-  CPUReservationHighAlert:
-    Type: AWS::CloudWatch::Alarm
+      Cooldown: 300
+      ScalingAdjustment: 1
+  
+  MemoryReservationScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
     Properties:
-      AlarmName: !Sub ${AWS::StackName}-CPUReservationHighAlert
-      EvaluationPeriods: '1'
-      Statistic: Maximum
-      Threshold: '80'
-      Period: '60'
-      AlarmActions:
-      - !Ref CPUReservationScaleUpPolicy
-      Dimensions:
-      - Name: ClusterName
-        Value: !Ref ECSCluster
-      ComparisonOperator: GreaterThanThreshold
-      MetricName: CPUReservation
-      Namespace: AWS/ECS
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      Cooldown: 300
+      ScalingAdjustment: -1
 
   MemoryReservationHighAlert:
     Type: AWS::CloudWatch::Alarm
@@ -179,6 +162,8 @@ Resources:
       Period: '60'
       AlarmActions:
       - !Ref MemoryReservationScaleUpPolicy
+      OKActions:
+      - !Ref MemoryReservationScaleDownPolicy
       Dimensions:
       - Name: ClusterName
         Value: !Ref ECSCluster
