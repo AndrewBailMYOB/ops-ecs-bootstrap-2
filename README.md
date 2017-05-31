@@ -77,7 +77,7 @@ The script accepts the following:
 * parameter file path
 
 The provided makefile sets some default values and then calls the script in order
-to deploy the follwing stacks:
+to deploy the following stacks:
 
 * network (ops-ecs-network)
 * ECS cluster (ops-ecs-cluster)
@@ -85,7 +85,7 @@ to deploy the follwing stacks:
 
 ## EC2 SSH Keypair
 If this key does not exist in the account for the region, it will be created
-and the private key material is emitted to a local `pem` file. Ensure this
+and the private key material emitted to a local `pem` file. Ensure this
 material is captured, saved, and the original file removed securely.
 
 The script which creates the keypair is [create-keypair.sh](scripts/create-keypair.sh).
@@ -120,4 +120,4 @@ make stack
 
 Once executed, the stacks are deployed to the production region. Once again,
 ensure that the key material (`ops-ecs-key.pem`) is saved to an appropriate
-location.
+location and the file removed.
