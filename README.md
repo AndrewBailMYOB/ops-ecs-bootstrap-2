@@ -1,5 +1,7 @@
 # PE Container Run-time Foundation (ECS)
 
+[![Build status](https://badge.buildkite.com/7842a01eaebc926427faf465582eb823d14f3a4b32245fc5c1.svg)](https://buildkite.com/myob/ops-cloudformation)
+
 This repository contains a number of CloudFormation templates and helper
 scripts designed to create foundation stacks for running Docker containers
 in AWS ECS.
