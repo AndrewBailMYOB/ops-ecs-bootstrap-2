@@ -173,8 +173,11 @@ Resources:
       Period: '60'
       AlarmActions:
       - !Ref EcsClusterScaleUpPolicy
+<<<<<<< Updated upstream
       OKActions:
       - !Ref EcsClusterScaleDownPolicy
+=======
+>>>>>>> Stashed changes
       Dimensions:
       - Name: ClusterName
         Value: !Ref ECSCluster
@@ -192,8 +195,11 @@ Resources:
       Period: '60'
       AlarmActions:
       - !Ref EcsClusterScaleUpPolicy
+<<<<<<< Updated upstream
       OKActions:
       - !Ref EcsClusterScaleDownPolicy
+=======
+>>>>>>> Stashed changes
       Dimensions:
       - Name: ClusterName
         Value: !Ref ECSCluster
