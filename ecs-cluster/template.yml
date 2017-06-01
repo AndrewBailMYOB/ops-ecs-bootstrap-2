@@ -136,38 +136,21 @@ Resources:
         ToPort: 443
         CidrIp: 0.0.0.0/0
 
-  CPUReservationScaleUpPolicy:
+  EcsClusterScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
       AdjustmentType: ChangeInCapacity
       AutoScalingGroupName: !Ref AutoScalingGroup
-      Cooldown: '300'
-      ScalingAdjustment: '1'
-
-  MemoryReservationScaleUpPolicy:
+      Cooldown: 300
+      ScalingAdjustment: 1
+  
+  EcsClusterScaleDownPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
       AdjustmentType: ChangeInCapacity
       AutoScalingGroupName: !Ref AutoScalingGroup
-      Cooldown: '300'
-      ScalingAdjustment: '1'
-
-  CPUReservationHighAlert:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: !Sub ${AWS::StackName}-CPUReservationHighAlert
-      EvaluationPeriods: '1'
-      Statistic: Maximum
-      Threshold: '80'
-      Period: '60'
-      AlarmActions:
-      - !Ref CPUReservationScaleUpPolicy
-      Dimensions:
-      - Name: ClusterName
-        Value: !Ref ECSCluster
-      ComparisonOperator: GreaterThanThreshold
-      MetricName: CPUReservation
-      Namespace: AWS/ECS
+      Cooldown: 300
+      ScalingAdjustment: -1
 
   MemoryReservationHighAlert:
     Type: AWS::CloudWatch::Alarm
@@ -178,12 +161,33 @@ Resources:
       Threshold: '80'
       Period: '60'
       AlarmActions:
-      - !Ref MemoryReservationScaleUpPolicy
+      - !Ref EcsClusterScaleUpPolicy
+      OKActions:
+      - !Ref EcsClusterScaleDownPolicy
       Dimensions:
       - Name: ClusterName
         Value: !Ref ECSCluster
       ComparisonOperator: GreaterThanThreshold
       MetricName: MemoryReservation
+      Namespace: AWS/ECS
+  
+  CpuReservationHighAlert:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${AWS::StackName}-CpuReservationHighAlert
+      EvaluationPeriods: '1'
+      Statistic: Maximum
+      Threshold: '80'
+      Period: '60'
+      AlarmActions:
+      - !Ref EcsClusterScaleUpPolicy
+      OKActions:
+      - !Ref EcsClusterScaleDownPolicy
+      Dimensions:
+      - Name: ClusterName
+        Value: !Ref ECSCluster
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: CPUReservation
       Namespace: AWS/ECS
 
 Outputs:
