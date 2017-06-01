@@ -13,10 +13,10 @@
   },
   {
     "ParameterKey": "ASGMinSize",
-    "ParameterValue": "3"
+    "ParameterValue": "1"
   },
   {
     "ParameterKey": "ASGDesiredSize",
-    "ParameterValue": "3"
+    "ParameterValue": "2"
   }
 ]
