@@ -1,6 +1,6 @@
 #!/bin/bash
 
-endpoint="http://google.com"
+endpoint="${1:-http://google.com}"
 logfile="zdd.log"
 timeout=.3
 
