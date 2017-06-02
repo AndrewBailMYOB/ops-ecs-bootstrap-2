@@ -63,7 +63,9 @@ An ECS cluster which defines default values for:
 A default role for the `ec2` instances is defined and provided with a basic
 policy for accessing internal resources.
 
-Instance draining has been implemented as per [https://aws.amazon.com/blogs/compute/how-to-automate-container-instance-draining-in-amazon-ecs/](https://aws.amazon.com/blogs/compute/how-to-automate-container-instance-draining-in-amazon-ecs/).
+Instances are configured to automatically drain connections before scaling
+events remove instances from the cluster. For further details, see:
+[https://aws.amazon.com/blogs/compute/how-to-automate-container-instance-draining-in-amazon-ecs/](https://aws.amazon.com/blogs/compute/how-to-automate-container-instance-draining-in-amazon-ecs/).
 
 ## Deploying the Stacks
 
