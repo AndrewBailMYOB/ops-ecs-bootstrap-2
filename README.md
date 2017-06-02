@@ -133,7 +133,7 @@ the associated supporting resources. This image should be pulled by a service
 creator and used to create or update a service stack.
 
 Further infomation for using this image is available in the
-[test app](github.com/MYOB-Technology/ops-ecs-testapp) repository.
+[test app](https://github.com/MYOB-Technology/ops-ecs-testapp) repository.
 
 The image bundles the template in [ecs-service](ecs-service/) and
 the [create-stack.sh](scripts/create-stack.sh) script into a Docker
