@@ -10,3 +10,8 @@ steps:
     command: make delete-test
     agents:
       queue: central-dev
+
+  - label: Rebuild ECS-Service image
+    command: ./scripts/push-image.sh latest
+    agents:
+      queue: central-dev

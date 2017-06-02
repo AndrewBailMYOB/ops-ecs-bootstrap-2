@@ -1,0 +1,26 @@
+[
+  {
+    "ParameterKey": "ImageRepository",
+    "ParameterValue": "693429498512.dkr.ecr.ap-southeast-2.amazonaws.com/platform-enablement/ecs-service"
+  },
+  {
+    "ParameterKey": "ContainerName",
+    "ParameterValue": "ecs-service"
+  },
+  {
+    "ParameterKey": "ImageVersion",
+    "ParameterValue": "3.0"
+  },
+  {
+    "ParameterKey": "LoadBalancerCertificateArn",
+    "ParameterValue": "arn:aws:acm:ap-southeast-2:693429498512:certificate/8a828e49-4bf1-4ad9-8a83-7448d564aa62"
+  },
+  {
+    "ParameterKey": "HostedZoneId",
+    "ParameterValue": "ZPC5IBN7J4QUS"
+  },
+  {
+    "ParameterKey": "ApplicationDomain",
+    "ParameterValue": "ops-ecs-service.ex-central-development.myob.com"
+  }
+]
