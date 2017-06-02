@@ -22,6 +22,12 @@ Parameters:
   ApplicationDomain:
     Description: The application domain i.e service.myob.com
     Type: String
+  ContainerPort:
+    Description: The port where the container will listen
+    Type: String
+  MemoryReservation:
+    Description: The Amount of memory available for the the task definition
+    Type: String
 
 Resources:
 
@@ -79,7 +85,7 @@ Resources:
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Port: 8080
+      Port: !Ref ContainerPort
       Protocol: HTTP
       VpcId: !ImportValue ops-ecs-vpcid
       HealthCheckIntervalSeconds: 30
@@ -103,7 +109,7 @@ Resources:
         - Type: spread
           Field: attribute:ecs.availability-zone
       LoadBalancers:
-        - ContainerPort: 8080
+        - ContainerPort: !Ref ContainerPort
           TargetGroupArn: !Ref TargetGroup
           ContainerName: !Ref ContainerName
 
@@ -113,12 +119,10 @@ Resources:
       ContainerDefinitions:
         - Name: !Ref ContainerName
           Essential: true
-          Memory: 512
-          MemoryReservation: 512
-          Cpu: 512
+          MemoryReservation: !Ref MemoryReservation
           Image: !Sub ${ImageRepository}:${ImageVersion}
           PortMappings:
-            - ContainerPort: 8080
+            - ContainerPort: !Ref ContainerPort
               HostPort: 0
           LogConfiguration:
             LogDriver: awslogs
