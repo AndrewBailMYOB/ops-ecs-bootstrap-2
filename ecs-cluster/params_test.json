@@ -18,5 +18,9 @@
   {
     "ParameterKey": "ASGDesiredSize",
     "ParameterValue": "1"
+  },
+  {
+    "ParameterKey": "S3BucketName",
+    "ParameterValue": "myob-ops-ecs-cluster-us-west-2"
   }
 ]

@@ -23,7 +23,6 @@ Parameters:
     Default: 3
   S3BucketName:
     Type: String
-    Default: myob-ops-ecs-cluster
     Description: >
       REQUIRED - Specifies the name of your AWS account S3 bucket in which the index.zip file is stored. index.zip contains the Python Lambda code index.py; Please download this from https://github.com/awslabs/ecs-cid-sample/tree/master/code and upload to your S3 bucket.
 Resources:
