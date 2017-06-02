@@ -18,7 +18,7 @@ docker build -t "$imgrepo:$version" . || die "Unable to build Docker image"
 
 log "Logging in to Artifactory as \"$ci_user\""
 docker login -u "$ci_user" \
-    -p $(aws s3 cp --sse aws:kms "s3://myob-jfrog-api-keys/$ci_user/APIKEY" -) \
+    -p "$(aws s3 cp --sse aws:kms s3://myob-jfrog-api-keys/$ci_user/APIKEY -)" \
     imyob-docker-public.jfrog.io \
     || die "Unable to log in to Artifactory as \"$ci_user\""
 
