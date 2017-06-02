@@ -3,7 +3,6 @@ FROM alpine
 RUN apk --no-cache add \
         wget \
         curl \
-        make \
         python3 \
         bash
 
