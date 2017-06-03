@@ -1,0 +1,234 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Ops Poc application stack to be hosted on ecs.
+
+Parameters:
+  ImageRepository:
+    Type: String
+    Description: The name of the Docker repository which holds the opc-poc-ecs-app Docker image
+  ImageVersion:
+    Type: String
+    Description: The version tag of the ops-poc-ecs-app docker image in ECR
+    Default: latest
+  ContainerName:
+    Type: String
+    Description: The Docker container name for this application
+  LoadBalancerCertificateArn:
+    Description: Amazon Resource Name (ARN) of the certificate to associate with the load balancer.
+    Type: String
+    Default: ''
+  HostedZoneId:
+    Description: The hosted zone id for your application domain.
+    Type: String
+  ApplicationDomain:
+    Description: The application domain i.e service.myob.com
+    Type: String
+  ContainerPort:
+    Description: The port where the container will listen
+    Type: String
+  MemoryReservation:
+    Description: The Amount of memory available for the the task definition
+    Type: String
+
+Resources:
+
+  ECSServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: ecs-service
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: ['elasticloadbalancing:DeregisterInstancesFromLoadBalancer', 'elasticloadbalancing:DeregisterTargets',
+              'elasticloadbalancing:Describe*', 'elasticloadbalancing:RegisterInstancesWithLoadBalancer',
+              'elasticloadbalancing:RegisterTargets', 'ec2:Describe*', 'ec2:AuthorizeSecurityGroupIngress']
+            Resource: '*'
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${AWS::StackName}-alb
+      Scheme: internet-facing
+      SecurityGroups:
+      - !ImportValue ops-ecs-albsgid
+      Subnets: !Split [",", !ImportValue ops-ecs-pub-subnetids]
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Protocol: HTTP
+      Port: 80
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      DefaultActions:
+      - TargetGroupArn: !Ref TargetGroup
+        Type: forward
+
+  HttpsListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      Protocol: HTTPS
+      Port: 443
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      DefaultActions:
+      - TargetGroupArn: !Ref TargetGroup
+        Type: forward
+      Certificates:
+      - CertificateArn: !Ref LoadBalancerCertificateArn
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: !Ref ContainerPort
+      Protocol: HTTP
+      VpcId: !ImportValue ops-ecs-vpcid
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /health
+      HealthCheckTimeoutSeconds: 15
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 4
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 10
+
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: Listener
+    Properties:
+      Cluster: !ImportValue ops-ecs-clusterid
+      DesiredCount: 2
+      Role: !Ref ECSServiceRole
+      TaskDefinition: !Ref TaskDefinition
+      PlacementStrategies:
+        - Type: spread
+          Field: attribute:ecs.availability-zone
+      LoadBalancers:
+        - ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref TargetGroup
+          ContainerName: !Ref ContainerName
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - Name: !Ref ContainerName
+          Essential: true
+          MemoryReservation: !Ref MemoryReservation
+          Image: !Sub ${ImageRepository}:${ImageVersion}
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              HostPort: 0
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: !Ref ContainerName
+
+  ServideDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Comment: CNAME referencing the ALB
+      Name: !Ref ApplicationDomain
+      Type: CNAME
+      TTL: '3'
+      ResourceRecords:
+      - !GetAtt ApplicationLoadBalancer.DNSName
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub ${AWS::StackName}-${ContainerName}
+      RetentionInDays: 30
+
+  ServiceScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ECSService
+    Properties:
+      MaxCapacity: 10
+      MinCapacity: 2
+      ResourceId: !Join ['', [service/, !ImportValue ops-ecs-clusterid, /, !GetAtt [ECSService, Name]]]
+      RoleARN: !GetAtt [AutoscalingRole, Arn]
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  ServiceScaleUpPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub ${ContainerName}-StepUpPolicy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref 'ServiceScalingTarget'
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+        - MetricIntervalLowerBound: 0
+          ScalingAdjustment: 1
+
+  ServiceScaleDownPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub ${ContainerName}-StepDownPolicy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref 'ServiceScalingTarget'
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+        - MetricIntervalUpperBound: 0
+          ScalingAdjustment: -1
+
+  CPUUtilizationHighAlert:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: '1'
+      Statistic: Average
+      Threshold: '80'
+      Period: '60'
+      AlarmActions:
+      - !Ref ServiceScaleUpPolicy
+      OKActions:
+      - !Ref ServiceScaleDownPolicy
+      Dimensions:
+      - Name: ClusterName
+        Value: !ImportValue ops-ecs-clusterid
+      - Name: ServiceName
+        Value: !GetAtt ECSService.Name
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: CPUUtilization
+      Namespace: AWS/ECS
+
+  AutoscalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ContainerName}-${ImageVersion}-Autoscaling-Role
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [application-autoscaling.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: service-autoscaling
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: ['application-autoscaling:*', 'cloudwatch:DescribeAlarms', 'cloudwatch:PutMetricAlarm',
+              'ecs:DescribeServices', 'ecs:UpdateService']
+            Resource: '*'
+
+Outputs:
+  OpsECSAlbURL:
+    Value: !Sub http://${ApplicationLoadBalancer.DNSName}/
+  OpsEcsDomain:
+    Value: !Sub https://${ApplicationDomain}/

@@ -1,10 +1,15 @@
-# PE Container Run-time Foundation (ECS)
+# Don't Panic: ECS Bootstrap Tooling
 
 [![Build status](https://badge.buildkite.com/7842a01eaebc926427faf465582eb823d14f3a4b32245fc5c1.svg)](https://buildkite.com/myob/ops-cloudformation)
 
 This repository contains a number of CloudFormation templates and helper
 scripts designed to create foundation stacks for running Docker containers
 in AWS ECS.
+
+In order to deploy an application to this set of stacks a test application
+is available to use as a base:
+
+[ops-ecs-testapp](https://github.com/MYOB-Technology/ops-ecs-testapp)
 
 
 ## Environments
@@ -63,7 +68,9 @@ An ECS cluster which defines default values for:
 A default role for the `ec2` instances is defined and provided with a basic
 policy for accessing internal resources.
 
-Instance draining has been implemented as per [https://aws.amazon.com/blogs/compute/how-to-automate-container-instance-draining-in-amazon-ecs/](https://aws.amazon.com/blogs/compute/how-to-automate-container-instance-draining-in-amazon-ecs/).
+Instances are configured to automatically drain connections before scaling
+events remove instances from the cluster. For further details, see:
+[https://aws.amazon.com/blogs/compute/how-to-automate-container-instance-draining-in-amazon-ecs/](https://aws.amazon.com/blogs/compute/how-to-automate-container-instance-draining-in-amazon-ecs/).
 
 ## Deploying the Stacks
 
@@ -123,3 +130,19 @@ make stack
 Once executed, the stacks are deployed to the production region. Once again,
 ensure that the key material (`ops-ecs-key.pem`) is saved to an appropriate
 location and the file removed.
+
+
+## Service Image
+
+The supplied [Dockerfile](Dockerfile) is used to build an image that is
+stored in Artifactory and contains a template for a service definition and
+the supporting resources. This image should be pulled by a service creator
+and used to create or update a service stack.
+
+Further infomation for using this image is available in the
+[test app](https://github.com/MYOB-Technology/ops-ecs-testapp) repository.
+
+The image bundles the template in [ecs-service](ecs-service/) and
+the [create-stack.sh](scripts/create-stack.sh) script into a Docker
+container and uploads it to Artifactory.  This is achieved via a
+[script](scripts/push-image.sh).
