@@ -2,7 +2,7 @@
 
 version="${1:-dev}"
 ci_user="central_ci"
-imgrepo="imyob-docker-public.jfrog.op/ops-ecs-service"
+imgrepo="imyob-docker-public.jfrog.io/ops-ecs-service"
 
 log() { echo "$(date '+%Y-%m-%dT%H:%M:%S') $*"; }
 
