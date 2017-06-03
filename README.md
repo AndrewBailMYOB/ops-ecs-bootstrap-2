@@ -6,6 +6,11 @@ This repository contains a number of CloudFormation templates and helper
 scripts designed to create foundation stacks for running Docker containers
 in AWS ECS.
 
+In order to deploy an application to this set of stacks a test application
+is available to use as a base:
+
+[ops-ecs-testapp](https://github.com/MYOB-Technology/ops-ecs-testapp)
+
 
 ## Environments
 
@@ -131,8 +136,8 @@ location and the file removed.
 
 The supplied [Dockerfile](Dockerfile) is used to build an image that is
 stored in Artifactory and contains a template for a service definition and
-the associated supporting resources. This image should be pulled by a service
-creator and used to create or update a service stack.
+the supporting resources. This image should be pulled by a service creator
+and used to create or update a service stack.
 
 Further infomation for using this image is available in the
 [test app](https://github.com/MYOB-Technology/ops-ecs-testapp) repository.
