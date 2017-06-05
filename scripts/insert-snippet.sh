@@ -1,8 +1,11 @@
 #!/bin/bash
 
-orig="/dev/stdin"
-repl="${1:-repl.txt}"
-token="{replaceme}"
+orig="$1"
+repl="$2"
+token="{TASKENVIRONMENT}"
+
+usage() { echo "usage: $0 original_file snippet_file"; exit 0; }
+[[ "$#" -gt 1 ]] || usage
 
 while IFS= read -r line; do
     if [[ "$line" =~ $token ]]; then

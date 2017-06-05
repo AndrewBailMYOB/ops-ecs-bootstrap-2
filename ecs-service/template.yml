@@ -130,9 +130,7 @@ Resources:
               awslogs-group: !Ref LogGroup
               awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: !Ref ContainerName
-          Environment:
-            - Name: WELCOME_MESSAGE
-              Value: Welcome to the POC app running on ECS, this message is an env variable.
+          {TASKENVIRONMENT}
 
   ServideDNSRecord:
     Type: AWS::Route53::RecordSet
