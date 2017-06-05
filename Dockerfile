@@ -13,6 +13,7 @@ VOLUME /root/.aws
 RUN mkdir -p /srv/app
 
 COPY scripts/create-stack.sh /srv/app
+COPY scripts/insert-snippet.sh /srv/app
 COPY ecs-service/template.yml /srv/app
 
 WORKDIR /srv/app
