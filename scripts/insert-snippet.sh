@@ -17,4 +17,4 @@ while IFS= read -r line; do
     else
         echo "$line"
     fi
-done <$orig
+done <"$orig"
