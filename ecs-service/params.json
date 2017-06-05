@@ -22,5 +22,13 @@
   {
     "ParameterKey": "ApplicationDomain",
     "ParameterValue": "ops-ecs-service.ex-central-development.myob.com"
+  },
+  {
+    "ParameterKey": "ContainerPort",
+    "ParameterValue": "8080"
+  },
+  {
+    "ParameterKey": "MemoryReservation",
+    "ParameterValue": "512"
   }
 ]
