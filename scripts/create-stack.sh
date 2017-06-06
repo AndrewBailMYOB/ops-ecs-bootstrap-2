@@ -29,13 +29,13 @@ poll_timeout=5
 # NOTE: this isn't quite the same as AWS' check, but it's close
 [[ "$stack_name" =~ [^-a-zA-Z0-9] ]] && die "bad stack name"
 
-[[ -f $stack_tmpl ]]   || die "template is not a file"
-[[ -f $stack_params ]] || die "params is not a file"
+#[[ -f $stack_tmpl ]]   || die "template is not a file"
+#[[ -f $stack_params ]] || die "params is not a file"
 
-get_filesize() { wc -c <"$1"; }
-[[ $(get_filesize "$stack_tmpl") -gt "0" ]]     || die "template is zero bytes"
-[[ $(get_filesize "$stack_tmpl") -lt "51200" ]] || die "template is too big"
-[[ $(get_filesize "$stack_params") -gt "0" ]]   || die "params file is zero bytes"
+#get_filesize() { wc -c <"$1"; }
+#[[ $(get_filesize "$stack_tmpl") -gt "0" ]]     || die "template is zero bytes"
+#[[ $(get_filesize "$stack_tmpl") -lt "51200" ]] || die "template is too big"
+#[[ $(get_filesize "$stack_params") -gt "0" ]]   || die "params file is zero bytes"
 
 ### die "region=$AWS_DEFAULT_REGION stack_name=$stack_name stack_tmpl=$2 stack_params=$3"
 
