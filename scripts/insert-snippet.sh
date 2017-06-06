@@ -2,7 +2,7 @@
 
 orig="$1"
 repl="$2"
-token="{TASKENVIRONMENT}"
+token="TASKENVIRONMENT"
 
 usage() { echo "usage: $0 original_file snippet_file"; exit 0; }
 [[ "$#" -gt 1 ]] || usage
