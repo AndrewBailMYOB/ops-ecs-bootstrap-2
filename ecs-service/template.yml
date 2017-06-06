@@ -130,7 +130,7 @@ Resources:
               awslogs-group: !Ref LogGroup
               awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: !Ref ContainerName
-          {TASKENVIRONMENT}
+          TASKENVIRONMENT
 
   ServideDNSRecord:
     Type: AWS::Route53::RecordSet
