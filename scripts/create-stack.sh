@@ -26,6 +26,7 @@ stack_tmpl="$2"
 stack_params="$3"
 poll_timeout=5
 
+log "Validating stack and params files"
 # NOTE: this isn't quite the same as AWS' check, but it's close
 [[ "$stack_name" =~ [^-a-zA-Z0-9] ]] && die "bad stack name"
 
@@ -37,13 +38,13 @@ get_filesize() { wc -c <"$1"; }
 [[ $(get_filesize "$stack_tmpl") -lt "51200" ]] || die "template is too big"
 [[ $(get_filesize "$stack_params") -gt "0" ]]   || die "params file is zero bytes"
 
-### die "region=$AWS_DEFAULT_REGION stack_name=$stack_name stack_tmpl=$2 stack_params=$3"
+log "Processing: region=$AWS_DEFAULT_REGION stack_name=$stack_name stack_tmpl=$2 stack_params=$3"
 
 # polls aws for stack status
 wait_completion() {
     local stack_name="$1"
     local status
-    echo -n "Waiting for \"$stack_name\":"
+    echo -n "Waiting for \"$stack_name\":" 1>&2
     while true; do
         status=$(aws cloudformation describe-stack-events \
             --stack-name "$stack_name" \
@@ -79,7 +80,7 @@ wait_completion() {
         esac
         echo -n "."
         sleep $poll_timeout
-    done
+    done 1>&2
 }
 
 # creates or updates a stack
@@ -87,19 +88,20 @@ stack_ctl() {
     local action="$1"
     local arg=""
     [[ "$action" == "create-stack" ]] && arg="--disable-rollback"
-    log "name=$stack_name action=$action"
+    log "Executing: name=$stack_name action=$action"
 
     aws cloudformation "$action" "$arg" \
         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
         --stack-name "$stack_name" \
         --template-body "file://$stack_tmpl" \
-        --parameters "file://$stack_params" > /dev/null
+        --parameters "file://$stack_params" >/dev/null
 
     wait_completion "$stack_name" || return 1
 }
 
 # validate the template first
-aws cloudformation validate-template --template-body file://"$stack_tmpl" >/dev/null || die "invalid template"
+log "Validating template with AWS API"
+aws cloudformation validate-template --template-body file://"$stack_tmpl" || die "invalid template"
 
 action="create-stack"
 while read -r; do
