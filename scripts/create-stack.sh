@@ -103,6 +103,7 @@ stack_ctl() {
 log "Validating template with AWS API"
 aws cloudformation validate-template --template-body file://"$stack_tmpl" >/dev/null || die "invalid template"
 
+# if the stack_name already exists, perform an update-stack
 action="create-stack"
 while read -r; do
     [[ "$REPLY" == "$stack_name" ]] && { action="update-stack"; break; }
