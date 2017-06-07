@@ -101,7 +101,7 @@ stack_ctl() {
 
 # validate the template first
 log "Validating template with AWS API"
-aws cloudformation validate-template --template-body file://"$stack_tmpl" || die "invalid template"
+aws cloudformation validate-template --template-body file://"$stack_tmpl" >/dev/null || die "invalid template"
 
 action="create-stack"
 while read -r; do
