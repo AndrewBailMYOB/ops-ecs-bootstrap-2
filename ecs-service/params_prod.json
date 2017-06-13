@@ -1,0 +1,34 @@
+[
+  {
+    "ParameterKey": "ImageRepository",
+    "ParameterValue": "511270546264.dkr.ecr.ap-southeast-2.amazonaws.com/hcoa"
+  },
+  {
+    "ParameterKey": "ContainerName",
+    "ParameterValue": "hcoa"
+  },
+  {
+    "ParameterKey": "ImageVersion",
+    "ParameterValue": "latest"
+  },
+  {
+    "ParameterKey": "LoadBalancerCertificateArn",
+    "ParameterValue": "arn:aws:acm:ap-southeast-2:511270546264:certificate/fb2b4845-3a63-4b58-aeba-7564fcefcb0d"
+  },
+  {
+    "ParameterKey": "HostedZoneId",
+    "ParameterValue": "Z2527YM8EAK4SB"
+  },
+  {
+    "ParameterKey": "ApplicationDomain",
+    "ParameterValue": "hcoa.ledger.myob.com"
+  },
+  {
+    "ParameterKey": "ContainerPort",
+    "ParameterValue": "9010"
+  },
+  {
+    "ParameterKey": "MemoryReservation",
+    "ParameterValue": "2048"
+  }
+]
