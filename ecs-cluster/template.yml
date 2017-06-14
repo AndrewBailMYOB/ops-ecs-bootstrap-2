@@ -325,7 +325,7 @@ Outputs:
     Value: !Ref ECSCluster
     Description: "Outputs the name of the ECS cluster"
     Export:
-      Nameops-ecs-clusterid
+      Name: ops-ecs-clusterid
   OpsALBSecurityGroup:
     Value: !Ref ALBSecurityGroup
     Description: "Outputs the ID of the ALB security group"
