@@ -25,6 +25,10 @@ Parameters:
     Type: String
     Description: >
       REQUIRED - Specifies the name of your AWS account S3 bucket in which the index.zip file is stored. index.zip contains the Python Lambda code index.py; Please download this from https://github.com/awslabs/ecs-cid-sample/tree/master/code and upload to your S3 bucket.
+  AlarmNotificationEmail:
+    Type: String
+    Description: Email address used when when performance alarms are triggered.
+
 Resources:
   EC2Role:
     Type: AWS::IAM::Role
@@ -199,6 +203,48 @@ Resources:
       ComparisonOperator: GreaterThanThreshold
       MetricName: CPUReservation
       Namespace: AWS/ECS
+
+  MemoryUsageHighAlert:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${AWS::StackName}-MemoryUsageHighAlert
+      EvaluationPeriods: '5'
+      Statistic: Average
+      Threshold: '80'
+      Period: '60'
+      AlarmActions:
+      - !Ref MonitoringTopic
+      Dimensions:
+      - Name: ClusterName
+        Value: !Ref ECSCluster
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: MemoryUtilization
+      Namespace: AWS/ECS
+
+  CpuUsageHighAlert:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${AWS::StackName}-CpuUsageHighAlert
+      EvaluationPeriods: '5'
+      Statistic: Average
+      Threshold: '80'
+      Period: '60'
+      AlarmActions:
+      - !Ref MonitoringTopic
+      Dimensions:
+      - Name: ClusterName
+        Value: !Ref ECSCluster
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: CPUUtilization
+      Namespace: AWS/ECS
+
+  MonitoringTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      Subscription:
+        - Endpoint:
+             !Ref AlarmNotificationEmail
+          Protocol: "email"
 
   SNSLambdaRole:
     Type: "AWS::IAM::Role"

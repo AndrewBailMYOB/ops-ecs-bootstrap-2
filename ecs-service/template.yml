@@ -28,6 +28,9 @@ Parameters:
   MemoryReservation:
     Description: The Amount of memory available for the the task definition
     Type: String
+  AlarmNotificationEmail:
+      Type: String
+      Description: Email address used when when performance alarms are triggered.
 
 Resources:
 
@@ -207,6 +210,52 @@ Resources:
       ComparisonOperator: GreaterThanThreshold
       MetricName: CPUUtilization
       Namespace: AWS/ECS
+
+  MemoryUsageHighAverageAlert:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${AWS::StackName}-MemoryUsageHighAlert
+      EvaluationPeriods: '5'
+      Statistic: Average
+      Threshold: '80'
+      Period: '60'
+      AlarmActions:
+      - !Ref MonitoringTopic
+      Dimensions:
+      - Name: ClusterName
+        Value: !ImportValue ops-ecs-clusterid
+      - Name: ServiceName
+        Value: !GetAtt ECSService.Name
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: MemoryUtilization
+      Namespace: AWS/ECS
+
+  CpuUsageHighAverageAlert:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${AWS::StackName}-CpuUsageHighAlert
+      EvaluationPeriods: '5'
+      Statistic: Average
+      Threshold: '80'
+      Period: '60'
+      AlarmActions:
+      - !Ref MonitoringTopic
+      Dimensions:
+      - Name: ClusterName
+        Value: !ImportValue ops-ecs-clusterid
+      - Name: ServiceName
+        Value: !GetAtt ECSService.Name
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: CPUUtilization
+      Namespace: AWS/ECS
+
+  MonitoringTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      Subscription:
+        - Endpoint:
+             !Ref AlarmNotificationEmail
+          Protocol: "email"
 
   AutoscalingRole:
     Type: AWS::IAM::Role
